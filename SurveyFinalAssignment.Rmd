@@ -50,9 +50,25 @@ Therefore, young children's ages do not matter as much, but 15-20 is expected to
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
+
+First, create variable household size:
+```{r}
+# Household size: count for each household, how many persons there are in. 
+# a_hidp - Household identifier
+count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
+summary(count)
+
+# create variable to assign household size to each individual person 
+society$household_size <- NA 
+for (i in rownames(count)) { # for each household..
+  society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
+}
+```
+
 Couple (with/without children)
 Single adult (with/without children)
 Other type of household (with/without children)
+
 
 *c.Which weight should you use here?*
 
