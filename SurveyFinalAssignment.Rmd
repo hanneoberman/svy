@@ -2,7 +2,7 @@
 title: "Understanding Society"
 output: 
   html_notebook: 
-    theme: journal
+    theme: paper
 ---
 
 **Introduction**
