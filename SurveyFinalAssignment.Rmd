@@ -14,6 +14,7 @@ output:
 ```{r}
 require(survey)
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
+society$a_dvage <- as.numeric(society$a_dvage)
 head(society)
 ```
 
@@ -33,16 +34,55 @@ Lower MSE (Lohr, p. 286), and application from IP User Guide.
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
 
 ```{r}
-#syntax here
+# None of the age groups have 7 groups
+# Too many levels, have to find groups
+levels(society$a_gor_dv)
+# Calculate household weight (or use design weight?)
+# Calculate weight post-stratified for sex, age and government region.
 ```
 
 *4. What is the proportion of employed people of working age (15-64) in the population?*
 ```{r}
-#svy stuff
+# First, we investigate the a_employ variable.
+levels(society$a_employ[society$a_dvage > 15 & society$a_dvage < 64])
+# The variable a_employ has seven levels.
+summary(society$a_dvage[society$a_employ=="yes"])
+summary(society$a_dvage[society$a_employ=="no"])
+# Yes and no contain people of over 21 years of age.
+society[society$a_employ=="missing",]
+# Missing does not appear in the data
+society[society$a_employ=="inapplicable",]
+# Inapplicable seems to contain all children and youths of 21 years and younger
+# It cannot be assumed that none of them is employed. It can however be assumed that only a
+# small part of them is employed, as children under 15 cannot legally work.
+society[society$a_employ=="proxy respondent",]
+# No rows returned
+society[society$a_employ=="refuse",]
+society[society$a_employ=="don\'t know",]
+# Both refuse and don't know contain one row. These can be treated as missing data.
+
+# Thus, our goal is to compare the proportion of employed people (yes) of working age against 
+# the number of unemployed people (no, inapplicable), excluding the missing data (refuse, don't know)
+
+society$a_dvage <- as.numeric(society$a_dvage)
+with(society, society[a_employ=="yes" & a_dvage >64,])
+# There are people older than 64 still working, we should take those out. 
+with(society, society[a_employ=="yes" & a_dvage <15,])
+# No one younger than 15 years is reported to be working, which is to be expected as it was not
+# a question asked to people under 21 years of age.
+
+# Since we wish to know the proportion of employed people of working age, we need 2 groups, one with employed adults and one with unemployed adults and employed elderly.
+society$employ_dv <- as.numeric(0)
+society$employ_dv[society$a_employ=='yes' & society$a_dvage <= 65] <- 1
+
+# Now we can calculate the proportion
+Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
+Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
+svymean(~employ_dv, Design)
+# 43,3% of the population is employed.
 ```
 
 *5. Please investigate the relationship between age and household composition for the population of Great Britain.*
-43%
 
 *a. Investigate which age variable you should use*
 For householdcomposition, with/without children is key.
@@ -55,9 +95,9 @@ Single adult (with/without children)
 Other type of household (with/without children)
 
 *c.Which weight should you use here?*
+For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
 
-
-Lastly, compute population correlation estimate.
+*Lastly, compute population correlation estimate.*
 
 
 **Part II**
