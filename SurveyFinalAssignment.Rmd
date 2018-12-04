@@ -132,3 +132,7 @@ sum(adults, youths) #all personally completed interviews
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
 
+Creating variable 'interviews' that indicates responders vs. nonresponders (see also Q6)
+```{r}
+society$interviews <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" 
+```
