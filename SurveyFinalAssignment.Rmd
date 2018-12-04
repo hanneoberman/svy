@@ -31,7 +31,6 @@ It is a popular method because when carried out correctly, it leads to (almost) 
 Lower MSE (Lohr, p. 286), and application from IP User Guide.
 
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
-
 ```{r}
 #syntax here
 ```
@@ -75,4 +74,3 @@ sum(adults, youths) #all personally completed interviews
 
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
-
