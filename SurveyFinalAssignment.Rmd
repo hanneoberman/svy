@@ -2,7 +2,7 @@
 title: "Understanding Society"
 output: 
   html_notebook: 
-    theme: journal
+    theme: paper
 ---
 
 **Introduction**
@@ -90,9 +90,25 @@ Therefore, young children's ages do not matter as much, but 15-20 is expected to
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
+
+First, create variable household size:
+```{r}
+# Household size: count for each household, how many persons there are in. 
+# a_hidp - Household identifier
+count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
+summary(count)
+
+# create variable to assign household size to each individual person 
+society$household_size <- NA 
+for (i in rownames(count)) { # for each household..
+  society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
+}
+```
+
 Couple (with/without children)
 Single adult (with/without children)
 Other type of household (with/without children)
+
 
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
