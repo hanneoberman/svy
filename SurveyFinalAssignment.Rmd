@@ -9,7 +9,7 @@ output:
 
 The Innovation Panel is...
 
-Multi-stage sampling was used...
+Multistage stratified cluster sampling was used...
 
 Central to this research report are the following research questions: '...'. 
 
@@ -26,6 +26,8 @@ head(society)
 
 **Sampling Design**
 
+"Include descriptions of your frame and target and population, intended sample size, and method of sample selection. Discuss potential non-sampling, sampling, and non-response errors" (Assignment 6, fox, 2018).
+
 *1. The Innovation panel would interview multiple people from every household, but in the case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a popular method to do within-household selection of respondents?*
 
 
@@ -37,6 +39,13 @@ It is a popular method because when carried out correctly, it leads to (almost) 
 **Design Weights**
 
 *2. Despite the complex data structure, the design weights as included in the variable "a_psnenip_xd" have a very low variance. Can you explain why this is the case?*
+As the following table shows, the variance in the design weight variable is ...
+```{r} 
+Var. <- var(society$a_psnenip_xd) #compute variance in the design weight variable
+Descr. <- cbind(t(summary(society$a_psnenip_xd)), Var.) #combine with other descriptive statistics
+round(Descr., 2) #print with only two decimals
+```
+The low variance is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates (Lohr, **year**). 
 
 Lower MSE (Lohr, p. 286), and application from IP User Guide.
 
