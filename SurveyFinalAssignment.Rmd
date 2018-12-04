@@ -109,6 +109,22 @@ Couple (with/without children)
 Single adult (with/without children)
 Other type of household (with/without children)
 
+Household information data
+a_marstat - Legal marital status
+a_livesp - Living with spouse
+a_livewith - Living as part of a couple in household
+a_adresp15 - Adult responsible for child age < 15
+a_adresp17 - Adult responsible for child age < 17
+a_livesp_dv - Living with spouse
+a_cohab_dv - Living with cohabitee
+a_single_dv - Single in household
+a_mastat_dv - De facto marital status
+a_depchl_dv - Whether person is a dependent child
+a_rach16_dv - Whether responsible for a child under 16
+a_respm16_dv - Whether natural/adoptive/step mother of child under 16
+a_respf16 dv - Whether natural/adoptive/step father of child under 16
+a_nchild_dv - Number of own children in household
+a_ndepchl_dv - Number of own dependent children in household
 
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
@@ -132,7 +148,55 @@ sum(adults, youths) #all personally completed interviews
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
 
-Creating variable 'interviews' that indicates responders vs. nonresponders (see also Q6)
+- Indicate responders vs. nonresponders (see also Q6)
+- Collect auxiliary variables: look into age and gender specifically, but more general: 
+
+Identifiers of person
+a_gor_dv - Government office region
+a_urban_dv - Urban or rural area, derived
+
+Personal data
+a_sex - Sex
+a_racel_dv - Ethnic group
+a_employ - employment status
+a_ageest - Estimated age
+a_ageif - Age last birthday
+a_dvage - Age for whole sample
+a_agegr5_dv - Age group: 5-year intervals
+a_agegr10_dv - Age group: 10-year intervals
+a_agegr13_dv - Age group: 13 categories
+
+Household information data
+a_marstat - Legal marital status
+a_livesp - Living with spouse
+a_livewith - Living as part of a couple in household
+a_adresp15 - Adult responsible for child age < 15
+a_adresp17 - Adult responsible for child age < 17
+a_livesp_dv - Living with spouse
+a_cohab_dv - Living with cohabitee
+a_single_dv - Single in household
+a_mastat_dv - De facto marital status
+a_depchl_dv - Whether person is a dependent child
+a_rach16_dv - Whether responsible for a child under 16
+a_respm16_dv - Whether natural/adoptive/step mother of child under 16
+a_respf16 dv - Whether natural/adoptive/step father of child under 16
+a_nchild_dv - Number of own children in household
+a_ndepchl_dv - Number of own dependent children in household
+
+Interview data
+a_hhresp_dv - Household response status
+
+
+- Compare population and response distributions for each auxiliary variable (look if some groups are overrepresented in the sample)
+- Compute weighting model via statistical logistic regression.. or? via article? 
+- How to evaluate usefulness of variables --> how good they are in predicting response? 
+
+question: should we include the propensity to participate regarding to whether rest of the household participated..? how? "The adjustment is to be made in two stages, corresponding to household and individual non-response respectively."
+
+question: variables in the dataset as given or also include constructed variables like household_size, type etc? 
 ```{r}
-society$interviews <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" 
+society$response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # logical indicator of whether person participated in the survey: whether an interview was conducted T/F. 
+
 ```
+
+
