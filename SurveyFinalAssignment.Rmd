@@ -111,6 +111,7 @@ Therefore, young children's ages do not matter as much, but 15-20 is expected to
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
+Household composition: 
 
 First, create variable household size:
 ```{r}
@@ -124,6 +125,9 @@ society$household_size <- NA
 for (i in rownames(count)) { # for each household..
   society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
 }
+
+# household_type 
+# number of children (according to eurostat properties..)
 ```
 
 Couple (with/without children)
@@ -168,9 +172,53 @@ sum(adults, youths) #all personally completed interviews
 
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
+Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
 
-- Indicate responders vs. nonresponders (see also Q6)
-- Collect auxiliary variables: look into age and gender specifically, but more general: 
+If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. 
+
+/Schouten (2007) says: We propose a selection strategy of weighting variables that minimises the width of the bias interval. The strategy is a forward inclusion-backward elimination algorithm of auxiliary variables similar to algorithms applied in regression analysis. Variables are included or eliminated based on jackknife estimates of the mean and standard deviation of the change in interval width. 
+"We propose a selection strategy of weighting variables that minimises the width of the bias interval. The strategy is a forward inclusion-backward elimination algorithm of auxiliary variables similar to algorithms applied in regression analysis. Variables are included or eliminated based on jackknife estimates of the mean and standard deviation of the change in interval width./
+
+/The IP User Guide states "that all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05."
+???Note that all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05. Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight. In consequence, weights which are defined as equal (e.g. D_HHDENIP_XW AND D_PSNENIP_XW for the refreshment sample) will not necessarily have the same numeric value, but will retain the same between-person/household relative value??? (IP User Guide, p. 56). /
+
+Steps we want to undertake:
+1. Identify nonresponse
+2. Come up with strategy to identify useful auxiliary variables
+3. Select auxiliary variables 
+
+?need to compare every auxiliary variable individually? 
+
+First, we need to divide the population in the respondents and nonrespondents
+There are two stages of nonresponse here: 
+* individual nonresponse: whether a personal interview was conducted yes or no
+* household nonresponse: defined as completian of at least the household grid 
+
+```{r}
+society$person_response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # indicator of whether person conducted a personal interview (response)
+1-mean(society$person_response) # proportion of individual nonresponse
+levels(society$a_hhresp_dv) # looks like all households at least filled in the grid. 
+```
+Individual nonresponse is 26.2%
+It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid (maybe this is the case for wave 1?). According to user guide, this respons should be 1about 59%. CHECK. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
+
+/Person response: 
+The enumerated person weight (A_PSNENIP_XW) is defined for all persons in
+households that participated in IP1. The weight equals the IP1 household weight,
+post-stratified by age, sex, and grouped Government Office Region. The post-
+stratification targets are taken from Office for National Statistics 2008 mid-year
+population statistics. /
+
+Second, we want to come up with a strategy in how to select the most appropriate auxiliary variables to construct nonresponse weights. There are several ways to do this: 
+- algorithm 
+- statistical (stepwise) logistic regression: which auxiliary variables are best in predicting individual nonresponse. 
+- user guide indicates sex and gender as auxiliary variables. Women and older people are more prone to respond.  
+
+Third, we apply selection strategy:
+```{r}
+auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
+```
+? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
 Identifiers of person
 a_gor_dv - Government office region
@@ -206,19 +254,6 @@ a_ndepchl_dv - Number of own dependent children in household
 
 Interview data
 a_hhresp_dv - Household response status
-
-
-- Compare population and response distributions for each auxiliary variable (look if some groups are overrepresented in the sample)
-- Compute weighting model via statistical logistic regression.. or? via article? 
-- How to evaluate usefulness of variables --> how good they are in predicting response? 
-
-question: should we include the propensity to participate regarding to whether rest of the household participated..? how? "The adjustment is to be made in two stages, corresponding to household and individual non-response respectively."
-
-question: variables in the dataset as given or also include constructed variables like household_size, type etc? 
-```{r}
-society$response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # logical indicator of whether person participated in the survey: whether an interview was conducted T/F. 
-
-```
 
 **References**
 Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
