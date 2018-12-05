@@ -7,9 +7,15 @@ output:
 
 **Introduction**
 
+The Innovation Panel is...
 
+Multistage stratified cluster sampling was used...
 
+Central to this research report are the following research questions: '...'. 
 
+First we look at the sampling design and design weights, next population estimates are computed, and finally the effect of non-response on the estimates is investigated, as well as possible sources of non-response error.
+
+The data:
 
 ```{r}
 require(survey)
@@ -18,7 +24,9 @@ society$a_dvage <- as.numeric(society$a_dvage)
 head(society)
 ```
 
-**Part I**
+**Sampling Design**
+
+"Include descriptions of your frame and target and population, intended sample size, and method of sample selection. Discuss potential non-sampling, sampling, and non-response errors" (Assignment 6, fox, 2018).
 
 *1. The Innovation panel would interview multiple people from every household, but in the case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a popular method to do within-household selection of respondents?*
 
@@ -27,12 +35,21 @@ The Kish Grid method is used to select respondents in a household at random. Thi
 
 It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample. 
 
+
+**Design Weights**
+
 *2. Despite the complex data structure, the design weights as included in the variable "a_psnenip_xd" have a very low variance. Can you explain why this is the case?*
+As the following table shows, the variance in the design weight variable is ...
+```{r} 
+Var. <- var(society$a_psnenip_xd) #compute variance in the design weight variable
+Descr. <- cbind(t(summary(society$a_psnenip_xd)), Var.) #combine with other descriptive statistics
+round(Descr., 2) #print with only two decimals
+```
+The low variance is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates (Lohr, **year**). 
 
 Lower MSE (Lohr, p. 286), and application from IP User Guide.
 
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
-
 ```{r}
 # None of the age groups have 7 groups
 # Too many levels, have to find groups
@@ -41,6 +58,8 @@ levels(society$a_gor_dv)
 # Calculate weight post-stratified for sex, age and government region.
 ```
 
+
+**Population Esitimates**
 *4. What is the proportion of employed people of working age (15-64) in the population?*
 ```{r}
 # First, we investigate the a_employ variable.
@@ -80,6 +99,8 @@ Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psne
 Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
 svymean(~employ_dv, Design)
 # 43,3% of the population is employed.
+
+# Add 95% CI for the estimate.
 ```
 
 *5. Please investigate the relationship between age and household composition for the population of Great Britain.*
@@ -132,7 +153,7 @@ For this analysis, we want to use a weight per person (PSN), as it is impossible
 *Lastly, compute population correlation estimate.*
 
 
-**Part II**
+**Non-response**
 
 *6. Not all sample members you included in questions 1-5 participated in the survey. Use the variable "a_ivfio" to investigate how many people personally conducted an interview.*
 
@@ -199,4 +220,5 @@ society$response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "
 
 ```
 
-
+**References**
+Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
