@@ -145,7 +145,6 @@ sum(adults, youths) #all personally completed interviews
 
 *7. Repeat your analysis under question 4. Use only the people who personally did an interview. What is your conclusion? Is there a difference between respondents and nonrespondents when it comes to their employment?*
 
-
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
 
 - Indicate responders vs. nonresponders (see also Q6)
@@ -191,9 +190,6 @@ a_hhresp_dv - Household response status
 - Compute weighting model via statistical logistic regression.. or? via article? 
 - How to evaluate usefulness of variables --> how good they are in predicting response? 
 
-question: should we include the propensity to participate regarding to whether rest of the household participated..? how? "The adjustment is to be made in two stages, corresponding to household and individual non-response respectively."
-
-question: variables in the dataset as given or also include constructed variables like household_size, type etc? 
 ```{r}
 society$response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # logical indicator of whether person participated in the survey: whether an interview was conducted T/F. 
 
