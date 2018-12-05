@@ -220,4 +220,5 @@ society$response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "
 
 ```
 
-
+**References**
+Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
