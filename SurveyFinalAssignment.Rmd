@@ -19,7 +19,6 @@ The data:
 
 ```{r}
 require(survey)
-require(sampling)
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 society$a_dvage <- as.numeric(society$a_dvage)
 head(society)
@@ -51,78 +50,10 @@ The low variance is due to rescaling of the weights, as explained in the IP User
 Lower MSE (Lohr, p. 286), and application from IP User Guide.
 
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
-
-The weight a_psnenip_xw was calculated using the design weights (a_psnenip_xd), sex, age and government region. It is known that age was split up in seven groups and the government regions were split up in four, but which ones these were is unknown. To find out, we will start with a linear regression.
-
-
 ```{r}
-# First, make the dataset smaller by removing unnecessary columns
-society_4 <- society[,-c(5:7,9:56,60:75,77:89)]
-
-# To do so, we need to create dummy variables for government regions
-levels(society_4$a_gor_dv)
-society_4[society_4$a_gor_dv == "missing",]
-society_4[society_4$a_gor_dv == "northern ireland",]
-# None of the value are missing or northern ireland, so those can be ignored
-society_4$NE <- society_4$a_gor_dv == "north east"
-society_4$NW <- society_4$a_gor_dv == "north west"
-society_4$Y <- society_4$a_gor_dv == "yorkshire and the humber"
-society_4$EM <- society_4$a_gor_dv == "east midlands"
-society_4$WM <- society_4$a_gor_dv == "west midlands"
-society_4$EOE <- society_4$a_gor_dv == "east of england"
-society_4$L <- society_4$a_gor_dv == "london"
-society_4$SE <- society_4$a_gor_dv == "south east"
-society_4$SW <- society_4$a_gor_dv == "south west"
-society_4$W <- society_4$a_gor_dv == "wales"
-society_4$S <- society_4$a_gor_dv == "scotland"
-# Scotland is the baseline
-
-coeff <- with(society_4, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y + EM + WM + EOE + L + SE + SW + W))
-coeff <- coeff$coefficients
-
-# Let us start with government regions.
-coeff.gor <- sort(coeff[5:15])
-plot(sort(coeff.gor))
-
-```
-
-It is not completely clear which values should be grouped together, despite how nicely the weights are grouped. As can be seen on the map below, where the regions are numbered from the lowest to the highest weight, the grouping is rather strange.
-
-![pic_gov](GOR.png)
-
-The baseline and the other two areas with a weight close to zero are Scotland, London and the West Midlands. Scotland and London are likely candidates to be categories of their own, as Scotland has a strong regional identity and London is the capital of the country. From a data-driven perspective, combining the West Midlands with any region other than London or Scotland does not make sense, as the weight difference between those region and all other regions is relatively big. From a theory-driven perspective, we cannot think of any good reason to combine the West Midlands with London or Scotland: it is not filled with cities nor is it close enough to Scotland to assume a similar population.
-
-When assuming that the regions with a near-identical weight are in the same group and Scotland and London are two seperate categories, only a few possible groupings remain:
-
-1. South East, South West, and North East England are the third category, with Wales and the rest of England being the last category.
-- This makes some sense theoretically: the three are the very north and south of England, with the remainder being in the middle. Weight-wise however, combining the West Midlands with the areas with far lower weights does not make sense.
-
-2. The same as above, but with the West Midlands grouped with London.
-- This is more logical weight-wise than the first option, but from a theoretical perspective it is strange to combine the city with a rural area.
-
-3. The North West, West Midlands and East of England are the third category, with Wales and the rest of England being the last category.
-- Weight-wise it is just as logical or illogical as the first option, but from a theoretical standpoint taking three areas in the middle seems to have less of a basis than taking the outer areas like is done in the first option.
-
-4. The West Midlands alone being the third category, with the rest of England being the fourth.
-- This fits weight-wise, but why the West Midlands should be taken seperately is a mystery. It is however less absurd than combining it with London: the West Midlands may have unique features that we do not know about, but we do know that it is not a capital like London.
-
-In conclusion, the fourth option seems the most likely, as the grouping is logical from a data-driven perspective and while it does not quite make sense theoretically, there is no evidence that it is incorrect. The best alternative is the first option, as it makes the most sense from a theoretical perspective.
-
-
-```{r}
-# To find out which two should be combined, rerun the linear regression with these five groups.
-coeff.gor
-society_4$group1 <- with(society_4, SE==T|NE==T|SW==T)
-society_4$group2 <- with(society_4, W==T|Y==T|EM==T)
-society_4$group3 <- with(society_4, EOE==T|NW==T)
-coeff2 <- with(society_4, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + WM + L + group1 + group2 + group3))
-coeff2 <- coeff2$coefficients
-coeff2.gov <- sort(coeff2[5:9])
-plot(coeff2.gov)
-coeff2.gov
-# Well, that didn't make any difference
-
-
+# None of the age groups have 7 groups
+# Too many levels, have to find groups
+levels(society$a_gor_dv)
 # Calculate household weight (or use design weight?)
 # Calculate weight post-stratified for sex, age and government region.
 ```
@@ -152,6 +83,7 @@ society[society$a_employ=="don\'t know",]
 # Thus, our goal is to compare the proportion of employed people (yes) of working age against 
 # the number of unemployed people (no, inapplicable), excluding the missing data (refuse, don't know)
 
+society$a_dvage <- as.numeric(society$a_dvage)
 with(society, society[a_employ=="yes" & a_dvage >64,])
 # There are people older than 64 still working, we should take those out. 
 with(society, society[a_employ=="yes" & a_dvage <15,])
@@ -163,14 +95,12 @@ society$employ_dv <- as.numeric(0)
 society$employ_dv[society$a_employ=='yes' & society$a_dvage <= 65] <- 1
 
 # Now we can calculate the proportion
-# Create design
-# Don't remove the missing values yet, as the weights are calculated including missing values 
 Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
-# Make a subset of non-missing values
 Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
 svymean(~employ_dv, Design)
-confint(svymean(~employ_dv, Design))
-# 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%
+# 43,3% of the population is employed.
+
+# Add 95% CI for the estimate.
 ```
 
 *5. Please investigate the relationship between age and household composition for the population of Great Britain.*
