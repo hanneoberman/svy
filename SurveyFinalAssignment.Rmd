@@ -111,22 +111,77 @@ Therefore, young children's ages do not matter as much, but 15-20 is expected to
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
-Household composition: 
+Eurostat distinghuishes three types of variables used to descripte household composition: 
+  - Household size;
+  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
+)
+  - Number of children. 
 
 First, create variable household size:
 ```{r}
+levels(society$a_livesp_dv)
+levels(society$a_cohab_dv)
+levels(society$a_single_dv)
+levels(society$a_mastat_dv)
+
+##### HOUSEHOLD SIZE PER HOUSEHOLD & PER PEROSN
 # Household size: count for each household, how many persons there are in. 
 # a_hidp - Household identifier
 count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
 summary(count)
+households <- rownames(count)
 
 # create variable to assign household size to each individual person 
 society$household_size <- NA 
-for (i in rownames(count)) { # for each household..
+for (i in households) { # for each household..
   society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
 }
 
+##### NUMBER OF CHILDREN PER HOUSEHOLD 
+# table(society$a_mastat_dv[society$a_hidp == households[50]])["Child under 16"])
+countKids <- function(household) { # function that counts kids for a given household ID
+  count <- as.numeric(table(society$a_mastat_dv[society$a_hidp == household])["Child under 16"])
+  count
+}
+kidsperHousehold <- matrix(NA, length(households), 1) # empty vector to store number of kids per household 
+for (i in 1:length(households)) {
+  kidsperHousehold[i,1] <- countKids(households[i]) # store kids per household 
+}
+
+##### HOUSEHOLD TYPE 
+#### children yes or no 
+hasKids <- matrix(NA, length(households), 1)
+hasKids <- kidsperHousehold > 0 # logical to indicate whether household has children T/F
+
+#### COUPLE YES/NO, SINGLE YES/NO, OTHER.. 
+society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes" # true for all couples  
 # household_type 
+# couple, single adult or other 
+# couple if a_livesp_dv == T or a_cohab_dv = TRUE, single if a_single_dv = TRUE, else assign other 
+
+# with /by a_hidp, table the a_mastat_dcv 
+
+society$singleadults <- society$a_single_dv == "Yes"
+
+
+#any(society$inacouple[society$a_hidp == "1701238283"])  #returns true if there's couple in this household. 
+# children yes/no
+
+# calculate number of children per household 
+
+# householdgrouper <- society$a_hidp == i # logical indicator that groups households together
+# society$a_pno[householdgrouper] # 
+
+household_composition <- factor(household_composition, labels = c("Couple with children",
+                                                                  "Couple without children",
+                                                                  "Single adult with children",
+                                                                  "Single adult without children",
+                                                                  "Other with children",
+                                                                  "Other without children"))
+
+# count of children
+
+# with /by a_hidp, table the a_mastat_dcv 
 # number of children (according to eurostat properties..)
 ```
 
@@ -150,6 +205,9 @@ a_respm16_dv - Whether natural/adoptive/step mother of child under 16
 a_respf16 dv - Whether natural/adoptive/step father of child under 16
 a_nchild_dv - Number of own children in household
 a_ndepchl_dv - Number of own dependent children in household
+
+
+*source* https://ec.europa.eu/eurostat/statistics-explained/index.php/Household_composition_statistics
 
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
