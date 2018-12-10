@@ -3,7 +3,7 @@ title: "R Notebook"
 author:
 - Sanne Meijering
 - Hanne Oberman
-- Gerbrich
+- Gerbrich Ferdinands
 output: pdf_document
 ---
 
@@ -30,7 +30,7 @@ Var <- var(society$a_psnenip_xd)
 # Combine variance with other descriptive statistics
 Descr <- cbind(t(summary(society$a_psnenip_xd)), Var)
 # Print with up to 2 decimals
-round(Descr., 2)
+round(Descr, 2)
 ```
 
 ## Question 3
@@ -40,8 +40,8 @@ society_3 <- society[,-c(5:7,9:56,60:75,77:89)]
 
 # Investigate levels of government office region variable
 levels(society_3$a_gor_dv)
-society_3[society_3$a_gor_dv == "missing",]
-society_3[society_3$a_gor_dv == "northern ireland",]
+nrow(society_3[society_3$a_gor_dv == "missing",])
+nrow(society_3[society_3$a_gor_dv == "northern ireland",])
 # None of the value are missing or northern ireland, so those can be ignored
 
 # Create dummy variables for government office regions
@@ -58,7 +58,8 @@ society_3$W <- society_3$a_gor_dv == "wales"
 society_3$S <- society_3$a_gor_dv == "scotland"
 
 # Run linear regression (Scotland is the baseline for government office region)
-coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y + EM + WM + EOE + L + SE + SW + W))
+coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y
+                            + EM + WM + EOE + L + SE + SW + W))
 
 # Get coefficients
 coeff <- coeff$coefficients
@@ -77,26 +78,26 @@ summary(society$a_dvage[society$a_employ=="yes"])
 summary(society$a_dvage[society$a_employ=="no"])
 # Yes and no contain people of over 21 years of age.
 
-society[society$a_employ=="missing",]
-society[society$a_employ=="proxy respondent",]
+nrow(society[society$a_employ=="missing",])
+nrow(society[society$a_employ=="proxy respondent",])
 # Missing and proxy respondent do not appear in the data
 
-society[society$a_employ=="inapplicable",]
+summary(society$a_dvage[society$a_employ=="inapplicable"])
 # Inapplicable seems to contain all children and youths of 21 years and younger
 # It cannot be assumed that none of them is employed. It can however be assumed that only a
 # small part of them is employed, as children under 15 cannot be employed legally
 # and most would still be going to a school or university.
 
-society[society$a_employ=="refuse",]
-society[society$a_employ=="don\'t know",]
+nrow(society[society$a_employ=="refuse",])
+nrow(society[society$a_employ=="don\'t know",])
 # Both refuse and don't know contain one row. These can be treated as missing data.
 
 # Thus, our goal is to compare the proportion of employed people (yes) of working age against 
 # the number of unemployed people (no, inapplicable), excluding the missing data (refuse, don't know)
 
-with(society, society[a_employ=="yes" & a_dvage >64,])
+with(society, nrow(society[a_employ=="yes" & a_dvage >64,]))
 # There are people older than 64 still working, we should exclude those. 
-with(society, society[a_employ=="yes" & a_dvage <15,])
+with(society, nrow(society[a_employ=="yes" & a_dvage <15,]))
 # No one younger than 15 years is reported to be working, which is to be expected as it was not
 # a question asked to people under 21 years of age.
 
