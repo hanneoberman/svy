@@ -261,53 +261,66 @@ confint(svymean(~employ_dv, I_personal))
 After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
+There are several types of nonrepsonse (unit nonresponse, household nonresponse, item nonresponse, and attrition). We're going to look into auxiliary variables that can be useful for constructing weights for unit nonresponse. 
+
 Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
 
-If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. 
+If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. Different choices of auxiliary variables lead to different weights. In order to the weights to be useful, it is important to use powerful auxiliary variables (Brick, 2013).
 
-/Schouten (2007) says: We propose a selection strategy of weighting variables that minimises the width of the bias interval. The strategy is a forward inclusion-backward elimination algorithm of auxiliary variables similar to algorithms applied in regression analysis. Variables are included or eliminated based on jackknife estimates of the mean and standard deviation of the change in interval width. 
-"We propose a selection strategy of weighting variables that minimises the width of the bias interval. The strategy is a forward inclusion-backward elimination algorithm of auxiliary variables similar to algorithms applied in regression analysis. Variables are included or eliminated based on jackknife estimates of the mean and standard deviation of the change in interval width./
+The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or S??rndal and Lundstr??m's (2010) paper.  
 
-/The IP User Guide states "that all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05."
-???Note that all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05. Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight. In consequence, weights which are defined as equal (e.g. D_HHDENIP_XW AND D_PSNENIP_XW for the refreshment sample) will not necessarily have the same numeric value, but will retain the same between-person/household relative value??? (IP User Guide, p. 56). /
+We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) S??rndal and Lundstr??m's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict non-response. 
 
 Steps we want to undertake:
 1. Identify nonresponse
-2. Come up with strategy to identify useful auxiliary variables
-3. Select auxiliary variables 
+2. Identify pool of all possible auxiliary variables 
+3. Apply stepwise backwards logistic regression of possible auxiliary variables on nonresponse indicator. 
+4. Identify auxiliary variables useful in predicting nonresponse. 
 
 ?need to compare every auxiliary variable individually? 
 
 First, we need to divide the population in the respondents and nonrespondents
-There are two stages of nonresponse here: 
-* individual nonresponse: whether a personal interview was conducted yes or no
+There are two stages of nonresponse we want to consider: 
+* person nonresponse: whether a personal interview was conducted yes or no
 * household nonresponse: defined as completian of at least the household grid 
 
 ```{r}
-society$person_response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # indicator of whether person conducted a personal interview (response)
-1-mean(society$person_response) # proportion of individual nonresponse
-levels(society$a_hhresp_dv) # looks like all households at least filled in the grid. 
+society$person_response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # indicator of whether person conducted a personal interview (response) also take proxy into account..? 
+nonresponse <- 1-mean(society$person_response) # proportion of individual nonresponse
+levels(society$a_hhresp_dv) # looks like all households at least filled in the grid, so we only look into person (unit) nonresponse. 
 ```
-Individual nonresponse is 26.2%
-It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid (maybe this is the case for wave 1?). According to user guide, this respons should be 1about 59%. CHECK. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
+Individual nonresponse is ...%
 
-/Person response: 
+It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid. Even though according to the user guide, the household response should be about 59%. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
+
+Second, we need to identify the variables we want to put into our stewpise logistic regression. Logically, we would use all variables in our dataset but we run into a few problems. 
+
+of complete separation and multicollinearity between different variables describing the same property of units, for example the different age variables. This method also allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013), so for this assignment neither will we. 
+
+Third, we apply selection strategy:
+
+Test assumptions: at least 5 observations for each category.. 
+```{r}
+require(glmnet)
+auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
+```
+? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
+
+Create some tables showing response rates for different categories (age and sex for example.. )
+``` {r}
+table(society$person_response)
+table(society$person_response, )
+table(as.matrix(society$person_response), as.matrix(society$a_sex), dnn = c("response", "sex"))
+```
+
+
+Fourth: identify variables: \/Person response: 
 The enumerated person weight (A_PSNENIP_XW) is defined for all persons in
 households that participated in IP1. The weight equals the IP1 household weight,
 post-stratified by age, sex, and grouped Government Office Region. The post-
 stratification targets are taken from Office for National Statistics 2008 mid-year
 population statistics. /
 
-Second, we want to come up with a strategy in how to select the most appropriate auxiliary variables to construct nonresponse weights. There are several ways to do this: 
-- algorithm 
-- statistical (stepwise) logistic regression: which auxiliary variables are best in predicting individual nonresponse. 
-- user guide indicates sex and gender as auxiliary variables. Women and older people are more prone to respond.  
-
-Third, we apply selection strategy:
-```{r}
-auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
-```
-? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
 Identifiers of person
 a_gor_dv - Government office region
@@ -346,3 +359,5 @@ a_hhresp_dv - Household response status
 
 **References**
 Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
+Sa??rndal, C.E. and Lunsdstr??m, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131???144.
+Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51???68.
