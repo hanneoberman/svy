@@ -168,8 +168,8 @@ society$employ_dv[society$a_employ=='yes' & society$a_dvage <= 65] <- 1
 Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 # Make a subset of non-missing values
 Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
-svymean(~employ_dv, Design)
-confint(svymean(~employ_dv, Design))
+svymean(~employ_dv, Nonmiss)
+confint(svymean(~employ_dv, Nonmiss))
 # 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%
 ```
 
@@ -181,77 +181,22 @@ Therefore, young children's ages do not matter as much, but 15-20 is expected to
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
-Eurostat distinghuishes three types of variables used to descripte household composition: 
-  - Household size;
-  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
-)
-  - Number of children. 
+Household composition: 
 
 First, create variable household size:
 ```{r}
-levels(society$a_livesp_dv)
-levels(society$a_cohab_dv)
-levels(society$a_single_dv)
-levels(society$a_mastat_dv)
-
-##### HOUSEHOLD SIZE PER HOUSEHOLD & PER PEROSN
 # Household size: count for each household, how many persons there are in. 
 # a_hidp - Household identifier
 count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
 summary(count)
-households <- rownames(count)
 
 # create variable to assign household size to each individual person 
 society$household_size <- NA 
-for (i in households) { # for each household..
+for (i in rownames(count)) { # for each household..
   society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
 }
 
-##### NUMBER OF CHILDREN PER HOUSEHOLD 
-# table(society$a_mastat_dv[society$a_hidp == households[50]])["Child under 16"])
-countKids <- function(household) { # function that counts kids for a given household ID
-  count <- as.numeric(table(society$a_mastat_dv[society$a_hidp == household])["Child under 16"])
-  count
-}
-kidsperHousehold <- matrix(NA, length(households), 1) # empty vector to store number of kids per household 
-for (i in 1:length(households)) {
-  kidsperHousehold[i,1] <- countKids(households[i]) # store kids per household 
-}
-
-##### HOUSEHOLD TYPE 
-#### children yes or no 
-hasKids <- matrix(NA, length(households), 1)
-hasKids <- kidsperHousehold > 0 # logical to indicate whether household has children T/F
-
-#### COUPLE YES/NO, SINGLE YES/NO, OTHER.. 
-society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes" # true for all couples  
 # household_type 
-# couple, single adult or other 
-# couple if a_livesp_dv == T or a_cohab_dv = TRUE, single if a_single_dv = TRUE, else assign other 
-
-# with /by a_hidp, table the a_mastat_dcv 
-
-society$singleadults <- society$a_single_dv == "Yes"
-
-
-#any(society$inacouple[society$a_hidp == "1701238283"])  #returns true if there's couple in this household. 
-# children yes/no
-
-# calculate number of children per household 
-
-# householdgrouper <- society$a_hidp == i # logical indicator that groups households together
-# society$a_pno[householdgrouper] # 
-
-household_composition <- factor(household_composition, labels = c("Couple with children",
-                                                                  "Couple without children",
-                                                                  "Single adult with children",
-                                                                  "Single adult without children",
-                                                                  "Other with children",
-                                                                  "Other without children"))
-
-# count of children
-
-# with /by a_hidp, table the a_mastat_dcv 
 # number of children (according to eurostat properties..)
 ```
 
@@ -276,9 +221,6 @@ a_respf16 dv - Whether natural/adoptive/step father of child under 16
 a_nchild_dv - Number of own children in household
 a_ndepchl_dv - Number of own dependent children in household
 
-
-*source* https://ec.europa.eu/eurostat/statistics-explained/index.php/Household_composition_statistics
-
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
 
@@ -298,6 +240,25 @@ sum(adults, youths) #all personally completed interviews
 
 *7. Repeat your analysis under question 4. Use only the people who personally did an interview. What is your conclusion? Is there a difference between respondents and nonrespondents when it comes to their employment?*
 
+```{r}
+levels(society$a_ivfio)
+```
+
+There are forty levels, but by looking at the site (https://www.understandingsociety.ac.uk/documentation/innovation-panel/dataset-documentation/wave/1/datafile/a_indall_ip/variable/a_ivfio), we find only 10 appear in the first wave. Of those, only full interview and youth interview indicate interviews that personally did an interview. Language difficulties is a rather neutral description, but looking at the variable i_proxy:
+
+```{r}
+society$a_iproxy[society$a_ivfio=="Language difficulties",]
+```
+
+Shows that language difficulty also indicates missing data. Thus, only two of the levels indicate a personal interview and thus should be included for this analysis.
+
+```{r}
+I_personal <- with(Nonmiss, subset(Design, a_ivfio=="Full interview" | a_ivfio=="Youth Interview"))
+svymean(~employ_dv, I_personal)
+confint(svymean(~employ_dv, I_personal))
+```
+
+After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
 Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
