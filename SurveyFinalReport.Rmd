@@ -5,7 +5,13 @@ author:
 - Hanne Oberman
 - Gerbrich Ferdinands
 output: pdf_document
+
 ---
+
+```{r}
+society <- readRDS("Understanding Society innovation pnel wave A.RDS")
+society$a_dvage <- as.numeric(society$a_dvage)
+```
 
 # Introduction
 
@@ -30,10 +36,7 @@ For the Understanding Society study, up to three households per dwelling and up 
 >>>>>> It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample. (why?)**
 
 ### Question 2
-Using the sampling design described above, people were assigned design weights. There is very little variance between weights (0.02), which is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates 
->>>>>> (Lohr, **year**). 
-
->>>>>> Lower MSE (Lohr, p. 286), and application from IP User Guide.
+Using the sampling design described above, all sample mambers were assigned a design weight. As the following table shows, the variance in the design weight variable is `r round(var(society$a_psnenip_xd),2)`. With a mean of `r round(mean(society$a_psnenip_xd), 2)`, the coefficient of variation is only `r round(sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd), 2)`. The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Moreover, the maximum value of this variable suggests trimming of weights greater than 4. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
 
 ### Question 3
 The post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.
