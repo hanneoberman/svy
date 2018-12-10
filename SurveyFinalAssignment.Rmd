@@ -204,6 +204,7 @@ households <- rownames(count) # all household ID's
 # create 'household_info' to store all the information concerning households
 # columns: household_size, number of children, children yes/no,
 household_info <- matrix(NA, length(households), 5)
+#household_info <- data.frame(NA, )
 rownames(household_info) <- households
 colnames(household_info) <-
   c("household_size",
@@ -384,7 +385,55 @@ Second, we want to come up with a strategy in how to select the most appropriate
 
 Third, we apply selection strategy:
 ```{r}
-auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
+# auxiliaries <- subset(society, select = c("a_hidp",
+#                                           "a_gor_dv"
+#                                           
+#                                   
+#                                           )) #matrix of all possible auxiliary variables 
+
+require(MASS)
+# model with all predictors
+fullmodel <- glm(person_response ~ 
+                   a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                   a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
+                   a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
+                   a_nchild_dv + a_ndepchl_dv 
+                   # self-made variables:
+                   #household_type + household_size + children
+                   , family = binomial, data = society)
+# running this gives: fitted probabilities numerically 0 or 1 occured --> perfect separation.. what to do about it? 
+# model without those variables:
+
+fullmodel <- glm(person_response ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
+                a_mastat_dv # include number of children in hh, kids yes/no, household_size, type, for example.. 
+                   , family = binomial, data = society)
+
+summary(fullmodel)
+
+# model without any predictors
+emptymodel <- nothing <- glm(person_response ~ 
+                             1,
+                             family=binomial, data = society )
+summary(emptymodel)
+
+# backwards selection
+backwards <- step(fullmodel)
+summary(backwards)
+
+# forwards selection
+forwards <- step(emptymodel,
+scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
+
+# combined model
+
+# show different models: 
+formula(fullmodel)
+formula(backwards)
+formula(forwards)
+# formula(combined)
+
+...
 ```
 ? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
