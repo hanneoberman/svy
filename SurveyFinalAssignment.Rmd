@@ -234,17 +234,19 @@ For this analysis, we want to use a weight per person (PSN), as it is impossible
 
 Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Therefore, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together there are 485 cases of (partial) unit nonrespons within the subset of eligible individuals.
 
-Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons). 
+Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
 
-Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above.
+Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
 
 ```{r}
 summary(society$a_ivfio) #what's in the variable?
 adults <- sum(society$a_ivfio == "Full interview") #the full interviews with adults
 youths <- sum(society$a_ivfio ==  "Youth Interview") #the interviews with children
 sum(adults, youths) #all personally completed interviews
-NR <- matrix(0, 3600, 1)
-society <- cbind(society, NR)
+
+NR <- matrix(0, 3600, 1) #create nonresponse indicator
+society <- cbind(society, NR) #add to dataframe
+#the nonresponse indicator is 1 for all (partial) unit nonresponse
 society$NR[which(society$a_ivfio == "Youth: Oth non-int")] <- 1
 society$NR[which(society$a_ivfio == "Proxy interview")] <- 1
 society$NR[which(society$a_ivfio == "Refusal")] <- 1
