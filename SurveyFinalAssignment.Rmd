@@ -126,7 +126,7 @@ coeff2.gov
 ```
 
 
-**Population Esitimates**
+**Population Estimates**
 *4. What is the proportion of employed people of working age (15-64) in the population?*
 ```{r}
 # First, we investigate the a_employ variable.
@@ -301,21 +301,30 @@ There are two stages of nonresponse we want to consider:
 * household nonresponse: defined as completian of at least the household grid 
 
 ```{r}
-society$person_response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # indicator of whether person conducted a personal interview (response) also take proxy into account..? 
-nonresponse <- 1-mean(society$person_response) # proportion of individual nonresponse
+society$NR # non response indicator (see Q6)
+mean(society$NR) # compute proportion nonresponders
 levels(society$a_hhresp_dv) # looks like all households at least filled in the grid, so we only look into person (unit) nonresponse. 
 ```
-Individual nonresponse is ...%
+Individual nonresponse is 13.5%
 
 It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid. Even though according to the user guide, the household response should be about 59%. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
 
-Second, we need to identify the variables we want to put into our stewpise logistic regression. Logically, we would use all variables in our dataset but we run into a few problems. 
+Second, we need to identify the variables we want to put into our stewpise logistic regression. Logically, we would use all variables in our dataset but before we do that we need to check the assumptions of logistic regression: 
 
-of complete separation and multicollinearity between different variables describing the same property of units, for example the different age variables. This method also allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013), so for this assignment neither will we. 
+#1 DV on dichotomous scale
+#2 IV(s) should be on continuous or categorical scale 
+#3 Independence of observations + the dependent variable should have mutually exclusive and exhaustive categories.
+#4 Linear relationship between any continuous independent variables and the logit transformation of the dependent variable. 
+
+We know that assumptions 1-3 hold. We can check assumption 4 with the Box's M test.
+Some other issues we haev to deal with: 
+- Some of the possible predictors have complete separation for the non-response variable. To deal with this, we will use package glmnet to perform the stepwise logistic regression. 
+- Multicollinearity between IVs. We think multicollinearity of IVs (for example the different age variables) shouldn't be a problem, since it isn't a strict assumption for logistic regression. 
+
+The method of stepwise logistic regression allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013). However, we do think it is interesting to look into, but because it would make our analysis much more complicated and more difficult to interpret, so for this assignment we will not look into it.
 
 Third, we apply selection strategy:
 
-Test assumptions: at least 5 observations for each category.. 
 ```{r}
 require(glmnet)
 auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
