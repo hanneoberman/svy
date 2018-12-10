@@ -383,12 +383,10 @@ Now, we've got a matrix household_info, containing per household the following i
 
 *source* https://ec.europa.eu/eurostat/statistics-explained/index.php/Household_composition_statistics
 
-
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
 
 *Lastly, compute population correlation estimate.*
-
 
 **Non-response**
 
@@ -482,18 +480,65 @@ Second, we need to identify the variables we want to put into our stewpise logis
 
 We know that assumptions 1-3 hold. We can check assumption 4 with the Box's M test.
 Some other issues we haev to deal with: 
-- Some of the possible predictors have complete separation for the non-response variable. To deal with this, we will use package glmnet to perform the stepwise logistic regression. 
+- Some of the possible predictors have complete separation for the non-response variable. We will exclude these variables from the model. 
 - Multicollinearity between IVs. We think multicollinearity of IVs (for example the different age variables) shouldn't be a problem, since it isn't a strict assumption for logistic regression. 
 
-The method of stepwise logistic regression allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013). However, we do think it is interesting to look into, but because it would make our analysis much more complicated and more difficult to interpret, so for this assignment we will not look into it.
+The method of stepwise logistic regression allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013). However, we do think it is interesting to look into, but because it will make our analysis much more complicated and more difficult to interpret, so for this assignment we will not look into it.
 
 Third, we apply selection strategy:
+? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
 ```{r}
-require(glmnet)
 auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
+# auxiliaries <- subset(society, select = c("a_hidp",
+#                                           "a_gor_dv"
+#                                           
+#                                   
+#                                           )) #matrix of all possible auxiliary variables 
+
+require(MASS)
+# model with all predictors
+fullmodel <- glm(person_response ~ 
+                   a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                   a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
+                   a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
+                   a_nchild_dv + a_ndepchl_dv 
+                   # self-made variables:
+                   #household_type + household_size + children
+                   , family = binomial, data = society)
+# running this gives: fitted probabilities numerically 0 or 1 occured --> perfect separation.. what to do about it? 
+# model without those variables:
+
+fullmodel <- glm(person_response ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
+                a_mastat_dv # include number of children in hh, kids yes/no, household_size, type, for example.. 
+                   , family = binomial, data = society)
+
+summary(fullmodel)
+
+# model without any predictors
+emptymodel <- nothing <- glm(person_response ~ 
+                             1,
+                             family=binomial, data = society )
+summary(emptymodel)
+
+# backwards selection
+backwards <- step(fullmodel)
+summary(backwards)
+
+# forwards selection
+forwards <- step(emptymodel,
+scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
+
+# combined model
+
+# show different models: 
+formula(fullmodel)
+formula(backwards)
+formula(forwards)
+# formula(combined)
+
 ```
-? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
 Create some tables showing response rates for different categories (age and sex for example.. )
 ``` {r}
