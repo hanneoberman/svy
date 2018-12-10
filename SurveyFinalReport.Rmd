@@ -3,7 +3,7 @@ title: "Survey Data Analysis Final Report"
 author:
 - Sanne Meijering
 - Hanne Oberman
-- Gerbrich
+- Gerbrich Ferdinands
 output: pdf_document
 ---
 
