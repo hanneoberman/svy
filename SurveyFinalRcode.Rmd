@@ -1,0 +1,116 @@
+---
+title: "R Notebook"
+author:
+- Sanne Meijering
+- Hanne Oberman
+- Gerbrich
+output: pdf_document
+---
+
+# Initialization
+```{r}
+# Load packages
+require(survey)
+require(sampling)
+
+# Load society dataset
+society <- readRDS("Understanding Society innovation pnel wave A.RDS")
+society$a_dvage <- as.numeric(society$a_dvage)
+
+```
+
+# Sampling design
+
+## Question 2
+Investigation of design weights
+
+```{r}
+# Calculate variance of design weight
+Var <- var(society$a_psnenip_xd)
+# Combine variance with other descriptive statistics
+Descr <- cbind(t(summary(society$a_psnenip_xd)), Var)
+# Print with up to 2 decimals
+round(Descr., 2)
+```
+
+## Question 3
+```{r}
+# First, make the dataset smaller by removing unnecessary columns
+society_3 <- society[,-c(5:7,9:56,60:75,77:89)]
+
+# Investigate levels of government office region variable
+levels(society_3$a_gor_dv)
+society_3[society_3$a_gor_dv == "missing",]
+society_3[society_3$a_gor_dv == "northern ireland",]
+# None of the value are missing or northern ireland, so those can be ignored
+
+# Create dummy variables for government office regions
+society_3$NE <- society_3$a_gor_dv == "north east"
+society_3$NW <- society_3$a_gor_dv == "north west"
+society_3$Y <- society_3$a_gor_dv == "yorkshire and the humber"
+society_3$EM <- society_3$a_gor_dv == "east midlands"
+society_3$WM <- society_3$a_gor_dv == "west midlands"
+society_3$EOE <- society_3$a_gor_dv == "east of england"
+society_3$L <- society_3$a_gor_dv == "london"
+society_3$SE <- society_3$a_gor_dv == "south east"
+society_3$SW <- society_3$a_gor_dv == "south west"
+society_3$W <- society_3$a_gor_dv == "wales"
+society_3$S <- society_3$a_gor_dv == "scotland"
+
+# Run linear regression (Scotland is the baseline for government office region)
+coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y + EM + WM + EOE + L + SE + SW + W))
+
+# Get coefficients
+coeff <- coeff$coefficients
+coeff.gor <- sort(coeff[5:15])
+plot(coeff.gor)
+```
+
+# Population Estimates
+## Question 4
+```{r}
+# Investigate the a_employ variable.
+levels(society$a_employ[society$a_dvage > 15 & society$a_dvage < 64])
+# The variable a_employ has seven levels.
+
+summary(society$a_dvage[society$a_employ=="yes"])
+summary(society$a_dvage[society$a_employ=="no"])
+# Yes and no contain people of over 21 years of age.
+
+society[society$a_employ=="missing",]
+society[society$a_employ=="proxy respondent",]
+# Missing and proxy respondent do not appear in the data
+
+society[society$a_employ=="inapplicable",]
+# Inapplicable seems to contain all children and youths of 21 years and younger
+# It cannot be assumed that none of them is employed. It can however be assumed that only a
+# small part of them is employed, as children under 15 cannot be employed legally
+# and most would still be going to a school or university.
+
+society[society$a_employ=="refuse",]
+society[society$a_employ=="don\'t know",]
+# Both refuse and don't know contain one row. These can be treated as missing data.
+
+# Thus, our goal is to compare the proportion of employed people (yes) of working age against 
+# the number of unemployed people (no, inapplicable), excluding the missing data (refuse, don't know)
+
+with(society, society[a_employ=="yes" & a_dvage >64,])
+# There are people older than 64 still working, we should exclude those. 
+with(society, society[a_employ=="yes" & a_dvage <15,])
+# No one younger than 15 years is reported to be working, which is to be expected as it was not
+# a question asked to people under 21 years of age.
+
+# Since we wish to know the proportion of employed people of working age, we need 2 groups, one with employed adults and one with unemployed people and employed elderly.
+society$employ_dv <- as.numeric(0)
+society$employ_dv[society$a_employ=='yes' & society$a_dvage <= 65] <- 1
+
+# Create design
+# Don't remove the missing values yet, as the weights are calculated including missing values 
+Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
+# Make a subset of non-missing values
+Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
+svymean(~employ_dv, Nonmiss)
+confint(svymean(~employ_dv, Nonmiss))
+# 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%
+```
+

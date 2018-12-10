@@ -40,13 +40,15 @@ It is a popular method because when carried out correctly, it leads to (almost) 
 **Design Weights**
 
 *2. Despite the complex data structure, the design weights as included in the variable "a_psnenip_xd" have a very low variance. Can you explain why this is the case?*
-As the following table shows, the variance in the design weight variable is `r var(society$a_psnenip_xd)`. With a mean of `r mean(society$a_psnenip_xd)`, this constitutes a coefficient of variation that is only `r sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd)`.
+As the following table shows, the variance in the design weight variable is ...
 ```{r} 
 Var. <- var(society$a_psnenip_xd) #compute variance in the design weight variable
 Descr. <- cbind(t(summary(society$a_psnenip_xd)), Var.) #combine with other descriptive statistics
 round(Descr., 2) #print with only two decimals
 ```
-Low variance can be due to the rescaling of weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Also, the maximum value of the design weight variable suggests trimming. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
+The low variance is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates (Lohr, **year**). 
+
+Lower MSE (Lohr, p. 286), and application from IP User Guide.
 
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
 
@@ -166,8 +168,8 @@ society$employ_dv[society$a_employ=='yes' & society$a_dvage <= 65] <- 1
 Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 # Make a subset of non-missing values
 Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
-svymean(~employ_dv, Design)
-confint(svymean(~employ_dv, Design))
+svymean(~employ_dv, Nonmiss)
+confint(svymean(~employ_dv, Nonmiss))
 # 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%
 ```
 
@@ -182,144 +184,45 @@ To investigate the relationship between age and household composition, it is nec
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
-Eurostat distinghuishes three types of variables used to descripte household composition: 
-  - Household size;
-  - Number of children;
-  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
-)
+Household composition: 
 
-Compute variable household size, number of children per household, household type
+First, create variable household size:
 ```{r}
-levels(society$a_livesp_dv)
-levels(society$a_cohab_dv)
-levels(society$a_single_dv)
-levels(society$a_mastat_dv)
-
-##### HOUSEHOLD SIZE PER HOUSEHOLD
+# Household size: count for each household, how many persons there are in. 
 # a_hidp - Household identifier
-# Household size: count for each household, how many persons there are in.
-count <- as.matrix(table(society$a_hidp)) # number of occurrences of each a_hidp (indicator of size of household)
+count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
 summary(count)
-households <- rownames(count) # all household ID's
 
-# create 'household_info' to store all the information concerning households
-# columns: household_size, number of children, children yes/no,
-household_info <- matrix(NA, length(households), 5)
-#household_info <- data.frame(NA, )
-rownames(household_info) <- households
-colnames(household_info) <-
-  c("household_size",
-    "kidsperHousehold",
-    "hasKids",
-    "hasCouple",
-    "household_composition"
-  )
-
-household_info[, "household_size"] <- count
-
-##### HOUSEHOLD SIZE PER PERSON
-society$household_size <- NA
-for (i in households) {
-  # for each household..
-  society$household_size[society$a_hidp == i] <-count[i, ] # assign household size to each individual person 
+# create variable to assign household size to each individual person 
+society$household_size <- NA 
+for (i in rownames(count)) { # for each household..
+  society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
 }
 
-##### NUMBER OF CHILDREN PER HOUSEHOLD
-countKids <-
-  function(household) {
-    # function that counts kids for a given household ID
-    count <-
-      as.numeric(table(society$a_mastat_dv[society$a_hidp == household])["Child under 16"])
-    count
-  }
-
-kidsperHousehold <- matrix(NA, length(households), 1) # empty vector to store number of kids per household
-for (i in 1:length(households)) {
-  kidsperHousehold[i, 1] <- countKids(households[i]) # store kids per household
-}
-household_info[, "kidsperHousehold"] <- kidsperHousehold
-
-##### HOUSEHOLD TYPE
-#### children yes or no
-household_info[, "hasKids"] <- kidsperHousehold > 0 # to indicate whether household has children 0/1
-
-#### COUPLE YES/NO
-society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes" # true for all couples
-#hasCouple <- any(society$inacouple[society$a_hidp == households[50]])
-for (i in 1:1489) {
-  household_info[i, "hasCouple"] <- any(society$inacouple[society$a_hidp == households[i]])
-}
-#### SINGLE YES/NO, OTHER..
-society$single <- society$a_single_dv == "Yes" # true for all singles
-#hasCouple <- any(society$inacouple[society$a_hidp == households[50]])
-for (i in 1:1489) {
-  household_info[i, "hasCouple"] <- any(society$inacouple[society$a_hidp == households[i]])
-}
-
-#############################
-cwc <- matrix(NA, 1489, 1) # indicator for couples with children
-cwoc <- matrix(NA, 1489, 1) # indicator for couples without children
-swc <- matrix(NA, 1489, 1) # indicator for single adults with children
-swoc <-matrix(NA, 1489, 1) # indicator for single adults without children
-owc <- matrix(NA, 1489, 1) # indicator for other with children
-owoc <- matrix(NA, 1489, 1) # indicator for other withouth children
-
-for (i in 1:1489) {
-  cwc[i, ] <- # hasCouple = 1 and hasKids = 1
-    household_info[i, "hasCouple"] == 1 &&
-    household_info[i, "hasKids"] == 1 
-  cwoc[i, ] <- # hasCouple = 1, hasKids = 0
-    household_info[i, "hasCouple"] == 1 &&
-    household_info[i, "hasKids"] == 0 
-  swc[i, ] <- # if haskids is true and householdsize - kidsperHousehold = 1: single household with kids
-    household_info[i, "hasKids"] == 1 &&
-    as.numeric(household_info[i, "household_size"]) - as.numeric(household_info[i, "kidsperHousehold"]) == 1 
-  swoc[i, ] <- # if household size = 1 single without children.
-    household_info[i, "household_size"] == 1 
-}
-
-household_info[cwc, "household_composition"] <- "Couple with children" # Couples with children
-household_info[cwoc, "household_composition"] <- "Couple without children" # Couples without children
-household_info[swc, "household_composition"] <- "Single with children" # Single with kids
-household_info[swoc, "household_composition"] <-"Single without children" # Singles without kids
-
-for (i in 1:1489) { # create 'other'
-  owc[i, ] <- # if for the rest: hasKids = 1: other with kids
-    is.na(household_info[i, "household_composition"]) &&
-    household_info[i, "hasKids"] == 1 
-  owoc[i, ] <- # for the rest: hasKids = 0: other without kids.
-    is.na(household_info[i, "household_composition"]) &&
-    household_info[i, "hasKids"] == 0 
-}
-
-household_info[owc, "household_composition"] <- "Other with children" # Couples without children
-household_info[owoc, "household_composition"] <- "Other without children" # Couples without children
-
-## turn it into factor variable household_type. 
-household_type <- household_info[, "household_composition"]
-
-household_type <- factor(household_type,
-  labels = c(
-    "Couple with children",
-    "Couple without children",
-    "Single adult with children",
-    "Single adult without children",
-    "Other with children",
-    "Other without children"
-  )
-)
-
-table(household_type) # show how many of each category there are. 
-
-##################################################################
+# household_type 
+# number of children (according to eurostat properties..)
 ```
-TURN THIS MATRIX INTO DATAFRAME (CHANGE CODE AS WELL.. )
-Now, we've got a matrix household_info, containing per household the following information: 
-  - Household size;
-  - Number of children;
-  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
 
-*source* https://ec.europa.eu/eurostat/statistics-explained/index.php/Household_composition_statistics
+Couple (with/without children)
+Single adult (with/without children)
+Other type of household (with/without children)
+
+Household information data
+a_marstat - Legal marital status
+a_livesp - Living with spouse
+a_livewith - Living as part of a couple in household
+a_adresp15 - Adult responsible for child age < 15
+a_adresp17 - Adult responsible for child age < 17
+a_livesp_dv - Living with spouse
+a_cohab_dv - Living with cohabitee
+a_single_dv - Single in household
+a_mastat_dv - De facto marital status
+a_depchl_dv - Whether person is a dependent child
+a_rach16_dv - Whether responsible for a child under 16
+a_respm16_dv - Whether natural/adoptive/step mother of child under 16
+a_respf16 dv - Whether natural/adoptive/step father of child under 16
+a_nchild_dv - Number of own children in household
+a_ndepchl_dv - Number of own dependent children in household
 
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
@@ -340,6 +243,25 @@ sum(adults, youths) #all personally completed interviews
 
 *7. Repeat your analysis under question 4. Use only the people who personally did an interview. What is your conclusion? Is there a difference between respondents and nonrespondents when it comes to their employment?*
 
+```{r}
+levels(society$a_ivfio)
+```
+
+There are forty levels, but by looking at the site (https://www.understandingsociety.ac.uk/documentation/innovation-panel/dataset-documentation/wave/1/datafile/a_indall_ip/variable/a_ivfio), we find only 10 appear in the first wave. Of those, only full interview and youth interview indicate interviews that personally did an interview. Language difficulties is a rather neutral description, but looking at the variable i_proxy:
+
+```{r}
+society$a_iproxy[society$a_ivfio=="Language difficulties",]
+```
+
+Shows that language difficulty also indicates missing data. Thus, only two of the levels indicate a personal interview and thus should be included for this analysis.
+
+```{r}
+I_personal <- with(Nonmiss, subset(Design, a_ivfio=="Full interview" | a_ivfio=="Youth Interview"))
+svymean(~employ_dv, I_personal)
+confint(svymean(~employ_dv, I_personal))
+```
+
+After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
 Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
@@ -386,55 +308,7 @@ Second, we want to come up with a strategy in how to select the most appropriate
 
 Third, we apply selection strategy:
 ```{r}
-# auxiliaries <- subset(society, select = c("a_hidp",
-#                                           "a_gor_dv"
-#                                           
-#                                   
-#                                           )) #matrix of all possible auxiliary variables 
-
-require(MASS)
-# model with all predictors
-fullmodel <- glm(person_response ~ 
-                   a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-                   a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
-                   a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
-                   a_nchild_dv + a_ndepchl_dv 
-                   # self-made variables:
-                   #household_type + household_size + children
-                   , family = binomial, data = society)
-# running this gives: fitted probabilities numerically 0 or 1 occured --> perfect separation.. what to do about it? 
-# model without those variables:
-
-fullmodel <- glm(person_response ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
-                a_mastat_dv # include number of children in hh, kids yes/no, household_size, type, for example.. 
-                   , family = binomial, data = society)
-
-summary(fullmodel)
-
-# model without any predictors
-emptymodel <- nothing <- glm(person_response ~ 
-                             1,
-                             family=binomial, data = society )
-summary(emptymodel)
-
-# backwards selection
-backwards <- step(fullmodel)
-summary(backwards)
-
-# forwards selection
-forwards <- step(emptymodel,
-scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
-
-# combined model
-
-# show different models: 
-formula(fullmodel)
-formula(backwards)
-formula(forwards)
-# formula(combined)
-
-...
+auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
 ```
 ? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
