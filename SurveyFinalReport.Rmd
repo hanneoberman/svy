@@ -23,6 +23,7 @@ Central to this research report are the following research questions: '...'.
 
 In this report, we will first look at the sampling design and design weights. We will then calculate population estimates for some parameters. Finally, we will investigate the sources and effects of non-response errors.
 
+
 # Questions
 
 ## Sampling Design
@@ -30,13 +31,15 @@ In this report, we will first look at the sampling design and design weights. We
 ### Question 1
 For the Understanding Society study, up to three households per dwelling and up to three people per household were selected for interviews. If more than three households were found at a single dwelling, or if a single household contained more than three people, the Kish Grid method was used to select households or people at random.
 
+This method considered to lead to a random sample of household members, and avoids selection bias in the survey. When using the Kish Grid method, the researcher has to list all eligible household members and assign each of them a number i. The Kish Grid then helps you pick a random person i within the nth household you're investigating. 
 
->>>>>> This method considered to lead to a random sample of household members, and avoids selection bias in the survey. (Why?)
+See picture below for how a kish grid looks: 
+https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png (picture source)
 
->>>>>> It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample. (why?)**
+It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
 
 ### Question 2
-Using the sampling design described above, all sample mambers were assigned a design weight. As the following table shows, the variance in the design weight variable is `r round(var(society$a_psnenip_xd),2)`. With a mean of `r round(mean(society$a_psnenip_xd), 2)`, the coefficient of variation is only `r round(sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd), 2)`. The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Moreover, the maximum value of this variable suggests trimming of weights greater than 4. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
+Using the sampling design described above, all sample members were assigned a design weight. As the following table shows, the variance in the design weight variable is `r round(var(society$a_psnenip_xd),2)`. With a mean of `r round(mean(society$a_psnenip_xd), 2)`, the coefficient of variation is only `r round(sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd), 2)`. The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Moreover, the maximum value of this variable suggests trimming of weights greater than 4. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
 
 ### Question 3
 The post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.

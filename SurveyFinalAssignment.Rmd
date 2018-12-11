@@ -30,11 +30,10 @@ head(society)
 "Include descriptions of your frame and target and population, intended sample size, and method of sample selection. Discuss potential non-sampling, sampling, and non-response errors" (Assignment 6, fox, 2018).
 
 *1. The Innovation panel would interview multiple people from every household, but in the case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a popular method to do within-household selection of respondents?*
-
-
-The Kish Grid method is used to select respondents in a household at random. This method considered to lead to a random sample of household members, and avoids selection bias in the survey. 
+The Kish Grid method is used to select respondents in a household at random. This method considered to lead to a random sample of household members, and avoids selection bias in the survey. The Kish Grid is 
 
 It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample. 
+
 
 
 **Design Weights**
@@ -438,25 +437,18 @@ Second, we need to identify the variables we want to put into our stewpise logis
 
 We know that assumptions 1-3 hold. We can check assumption 4 with the Box's M test.
 Some other issues we have to deal with: 
-- Some of the possible predictors have complete separation for the non-response variable. We will exclude these variables from the model. 
+- Some of the possible predictors have complete separation for the non-response variable. We will exclude these variables from the model, because they can render unstable regression estimates with very large standard deviations. 
 - Multicollinearity between IVs. We think multicollinearity of IVs (for example the different age variables) shouldn't be a problem, since it isn't a strict assumption for logistic regression. 
 
 The method of stepwise logistic regression allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013). However, we do think it is interesting to look into, but because it will make our analysis much more complicated and more difficult to interpret, so for this assignment we will not look into it.
 
 Third, we apply selection strategy:
-? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
+
 
 ```{r}
-auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
-# auxiliaries <- subset(society, select = c("a_hidp",
-#                                           "a_gor_dv"
-#                                           
-#                                   
-#                                           )) #matrix of all possible auxiliary variables 
-
 require(MASS)
 # model with all predictors
-fullmodel <- glm(person_response ~ 
+fullmodel <- glm(NR ~ 
                    a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
                    a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
                    a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
@@ -465,17 +457,11 @@ fullmodel <- glm(person_response ~
                    # don't forget to include self-made variables:
                    #household_type + household_size + children
                    , family = binomial, data = society)
-# running this gives: fitted probabilities numerically 0 or 1 occured --> perfect separation.. what to do about it? 
-# model without those variables:
 
-fullmodel <- glm(person_response ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
-                a_mastat_dv # include number of children in hh, kids yes/no, household_size, type, for example.. 
-                   , family = binomial, data = society)
-
-summary(fullmodel)
+# running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 
 
 # model without any predictors
-emptymodel <- nothing <- glm(person_response ~ 
+emptymodel <- nothing <- glm(NR ~ 
                              1,
                              family=binomial, data = society )
 summary(emptymodel)
@@ -484,72 +470,29 @@ summary(emptymodel)
 backwards <- step(fullmodel)
 summary(backwards)
 
-# forwards selection
+# forwards selection to compare backwards model with it. 
 forwards <- step(emptymodel,
 scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
-
-# combined model
 
 # show different models: 
 formula(fullmodel)
 formula(backwards)
-formula(forwards)
-# formula(combined)
+
 
 ```
 
-Create some tables showing response rates for different categories (age and sex for example.. )
+The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
+The predictive accuracy of the stepwise model is ..., where for the full model this was ... 
+
+Create some tables showing response rates for different categories for the selected variables:
 ``` {r}
 table(society$person_response)
 table(society$person_response, )
 table(as.matrix(society$person_response), as.matrix(society$a_sex), dnn = c("response", "sex"))
 ```
 
-
-Fourth: identify variables: \/Person response: 
-The enumerated person weight (A_PSNENIP_XW) is defined for all persons in
-households that participated in IP1. The weight equals the IP1 household weight,
-post-stratified by age, sex, and grouped Government Office Region. The post-
-stratification targets are taken from Office for National Statistics 2008 mid-year
-population statistics. /
-
-
-Identifiers of person
-a_gor_dv - Government office region
-a_urban_dv - Urban or rural area, derived
-
-Personal data
-a_sex - Sex
-a_racel_dv - Ethnic group
-a_employ - employment status
-a_ageest - Estimated age
-a_ageif - Age last birthday
-a_dvage - Age for whole sample
-a_agegr5_dv - Age group: 5-year intervals
-a_agegr10_dv - Age group: 10-year intervals
-a_agegr13_dv - Age group: 13 categories
-
-Household information data
-a_marstat - Legal marital status
-a_livesp - Living with spouse
-a_livewith - Living as part of a couple in household
-a_adresp15 - Adult responsible for child age < 15
-a_adresp17 - Adult responsible for child age < 17
-a_livesp_dv - Living with spouse
-a_cohab_dv - Living with cohabitee
-a_single_dv - Single in household
-a_mastat_dv - De facto marital status
-a_depchl_dv - Whether person is a dependent child
-a_rach16_dv - Whether responsible for a child under 16
-a_respm16_dv - Whether natural/adoptive/step mother of child under 16
-a_respf16 dv - Whether natural/adoptive/step father of child under 16
-a_nchild_dv - Number of own children in household
-a_ndepchl_dv - Number of own dependent children in household
-
-Interview data
-a_hhresp_dv - Household response status
-
 **References**
+Kumar, Rohit. (2014). Respondent Selection Methods in Household Surveys. Jharkhand Jounral of Development and Management Studies. XII. 5701-5708. 
 Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
 Sa??rndal, C.E. and Lunsdstr??m, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131???144.
 Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51???68.
