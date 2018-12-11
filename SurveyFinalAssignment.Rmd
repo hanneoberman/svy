@@ -182,31 +182,11 @@ To investigate the relationship between age and household composition, it is nec
 
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
-Household composition: 
-
-First, create variable household size:
-```{r}
-# Household size: count for each household, how many persons there are in. 
-# a_hidp - Household identifier
-count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
-summary(count)
-
-# create variable to assign household size to each individual person 
-society$household_size <- NA 
-for (i in rownames(count)) { # for each household..
-  society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
-}
-
-# household_type 
-# number of children (according to eurostat properties..)
-
-```
  Eurostat distinghuishes three types of variables used to descripte household composition: 
   - Household size;
   - Number of children;
   - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
 )
-  - Number of children. 
 
 First, create variable household size:
 Compute variable household size, number of children per household, household type
@@ -216,11 +196,8 @@ levels(society$a_cohab_dv)
 levels(society$a_single_dv)
 levels(society$a_mastat_dv)
 
-##### HOUSEHOLD SIZE PER HOUSEHOLD & PER PEROSN
-# Household size: count for each household, how many persons there are in. 
 ##### HOUSEHOLD SIZE PER HOUSEHOLD
 # a_hidp - Household identifier
-count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
 # Household size: count for each household, how many persons there are in.
 count <- as.matrix(table(society$a_hidp)) # number of occurrences of each a_hidp (indicator of size of household)
 summary(count)
@@ -253,13 +230,6 @@ for (i in households) {
   society$household_size[society$a_hidp == i] <-count[i, ] # assign household size to each individual person 
 }
 
-##### NUMBER OF CHILDREN PER HOUSEHOLD 
-# table(society$a_mastat_dv[society$a_hidp == households[50]])["Child under 16"])
-countKids <- function(household) { # function that counts kids for a given household ID
-  count <- as.numeric(table(society$a_mastat_dv[society$a_hidp == household])["Child under 16"])
-  count
-}
-kidsperHousehold <- matrix(NA, length(households), 1) # empty vector to store number of kids per household 
 ##### NUMBER OF CHILDREN PER HOUSEHOLD
 countKids <-
   function(household) {
@@ -272,31 +242,19 @@ countKids <-
 kidsperHousehold <- matrix(NA, length(households), 1) # empty vector to store number of kids per household
 for (i in 1:length(households)) {
   kidsperHousehold[i,1] <- countKids(households[i]) # store kids per household 
-  kidsperHousehold[i, 1] <- countKids(households[i]) # store kids per household
 }
 household_info[, "kidsperHousehold"] <- kidsperHousehold
 
 ##### HOUSEHOLD TYPE 
 #### children yes or no 
-hasKids <- matrix(NA, length(households), 1)
-hasKids <- kidsperHousehold > 0 # logical to indicate whether household has children T/F
+# hasKids <- matrix(NA, length(households), 1)
+# hasKids <- kidsperHousehold > 0 # logical to indicate whether household has children T/F
 
-#### COUPLE YES/NO, SINGLE YES/NO, OTHER.. 
-society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes" # true for all couples  
-# household_type 
-# couple, single adult or other 
-# couple if a_livesp_dv == T or a_cohab_dv = TRUE, single if a_single_dv = TRUE, else assign other 
-
-# with /by a_hidp, table the a_mastat_dcv 
 ##### HOUSEHOLD TYPE
 #### children yes or no
 household_info[, "hasKids"] <- kidsperHousehold > 0 # to indicate whether household has children 0/1
-
 society$singleadults <- society$a_single_dv == "Yes"
 
-
-#any(society$inacouple[society$a_hidp == "1701238283"])  #returns true if there's couple in this household. 
-# children yes/no
 #### COUPLE YES/NO
 society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes" # true for all couples
 #hasCouple <- any(society$inacouple[society$a_hidp == households[50]])
@@ -386,7 +344,7 @@ Now, we've got a matrix household_info, containing per household the following i
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
 
-*Lastly, compute population correlation estimate.*
+*Lastly, investigate relationship between age and household composition *
 
 **Non-response**
 
@@ -479,7 +437,7 @@ Second, we need to identify the variables we want to put into our stewpise logis
 #4 Linear relationship between any continuous independent variables and the logit transformation of the dependent variable. 
 
 We know that assumptions 1-3 hold. We can check assumption 4 with the Box's M test.
-Some other issues we haev to deal with: 
+Some other issues we have to deal with: 
 - Some of the possible predictors have complete separation for the non-response variable. We will exclude these variables from the model. 
 - Multicollinearity between IVs. We think multicollinearity of IVs (for example the different age variables) shouldn't be a problem, since it isn't a strict assumption for logistic regression. 
 
@@ -504,7 +462,7 @@ fullmodel <- glm(person_response ~
                    a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
                    a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
                    a_nchild_dv + a_ndepchl_dv 
-                   # self-made variables:
+                   # don't forget to include self-made variables:
                    #household_type + household_size + children
                    , family = binomial, data = society)
 # running this gives: fitted probabilities numerically 0 or 1 occured --> perfect separation.. what to do about it? 
