@@ -1,21 +1,22 @@
 ---
 title: "Survey Data Analysis Final Report"
 author:
+- Gerbrich Ferdinands
 - Sanne Meijering
 - Hanne Oberman
-- Gerbrich Ferdinands
 output: pdf_document
 
 ---
 
-```{r}
+```{r include=FALSE}
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 society$a_dvage <- as.numeric(society$a_dvage)
 ```
 
+
 # Abstract
 
-In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the R package 'survey', and base R operations. [Add sentences about results and discussion!].
+In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the R package 'survey', and base R operations. **[Add sentences about results and discussion!]**.\
 *Key terms*: survey package, design weights, adjustment weights, nonresponse.
 
 # Table of Contents
@@ -31,16 +32,18 @@ Appendix II: R Script
 # Introduction
 
 To estimate population quantities from sample data, broadly two strategies can be employed: model-based inference and design-based inference (Lohr, 2010). In this technical report, the effect of the latter on population estimates is investigated, by means of analyzing a single wave of Great Britain's  multi-year panel study 'Understanding Society'. This annual household panel survey is used to assess topics like housing, education, health, and employment among the general population of the United Kingdom. More specifically, we focus on the a subset of first wave, conducted between 2008 and 2009: the 'Innovation Panel' (IP). 
-	The purpose of the IP was to enable methodological research, before initiating the main 'Understanding Society' survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population.
+
+The purpose of the IP was to enable methodological research, before initiating the main 'Understanding Society' survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population.
 	
 To obtain the sample from the sampling frame, multistage stratified cluster sampling was used. Postal sectors acted as primary sampling units (PSUs) in the cluster design, and were sorted by Government Office Region. Within these regions, strata were constructed based on a.o. non-manual occupations, ethnic minority density, and population density. After stratification, a sample was drawn from the  sampling frame (the Postcode Address File), with probabilities proportional to the number of postal delivery points within each postcode sector (the stratified PSUs). Per postcode sector, 23 addresses were selected, yielding a total of 2760 addresses. However, interviews were only achieved in 1489 households (Boreham, & Constantine, 2008).\
-[Add paragraph about Non-sampling, sampling, and nonresponse errors].
 
-The aim of this research project is to investigate several properties of the IP data, with respect to the sampling procedure, the use of weights in survey data analysis, and to estimate population quantities from the sample. The report is based on eight research questions (RQs) that were provided in the research proposal (Appendix I). The RQs are structured according to three topics: sampling, weighting, and estimation. In the sampling part, we investigate how within-household selection of respondents was performed (RQ1), and how many people within the sample personally conducted an interview (RQ6). The part concerning survey weights encompasses a theoretical explanation for the variation between design weights across observations (RQ2), computation of enumerated weights (RQ3), and an effort to suggest variables that could be used to construct nonresponse weights (RQ8). Finally, in the third part population quantities are estimated: the relationship between age and household composition (RQ5), and the proportion of employed people of working age in the population with and without accounting for nonresponse (RQ4 and RQ7, respectively). The exact formulation of the research questions can be found in Appendix I: Research Proposal.
+**[Add paragraph about Non-sampling, sampling, and nonresponse errors].**
+
+The aim of this research project is to investigate several properties of the IP data, with respect to the sampling procedure, the use of weights in survey data analysis, and to estimate population quantities from the sample. The report is based on eight research questions (RQs) that were provided in the research proposal (Appendix I: Research Proposal). The RQs are structured according to three topics: sampling, weighting, and estimation. In the sampling part, we investigate how within-household selection of respondents was performed (RQ1), and how many people within the sample personally conducted an interview (RQ6). The part concerning survey weights encompasses a theoretical explanation for the variation between design weights across observations (RQ2), computation of enumerated weights (RQ3), and an effort to suggest variables that could be used to construct nonresponse weights (RQ8). Finally, in the third part population quantities are estimated: the relationship between age and household composition (RQ5), and the proportion of employed people of working age in the population with and without accounting for nonresponse (RQ4 and RQ7, respectively). The exact formulation of the research questions can be found in Appendix I: Research Proposal.
 
 # Methods
 
-The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included the removal of irrelevant variables from the dataframe (see Appendix II: R Script).
+The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included recoding the variable 'a_dvage' as numeric instead of factor, and removal of irrelevant variables from the dataframe (see Appendix II: R Script).
 
 To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', and 'svymean' are employed to estimate population quantities.
 Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package 'MASS' (Venables, & Ripley, 2002).
@@ -56,7 +59,8 @@ For the Understanding Society study, up to three households per dwelling and up 
 
 This method considered to lead to a random sample of household members, and avoids selection bias in the survey. When using the Kish Grid method, the researcher has to list all eligible household members and assign each of them a number i. The Kish Grid then helps you pick a random person i within the n^th^ household you're investigating, see Figure 1. 
 
-https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png (picture source)
+![Kish Grid. *Note*. Reprinted from https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png](kish-grid.png)
+ 
 
 It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
 
@@ -72,45 +76,61 @@ Of the 3600 individuals in the sample, there are 459 children under the age of t
 
 Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
 
-Because (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
+Because (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate how weights may be constructed to adjust for unit nonresponse (see Part III: Estimation).
 
 
 ## Part II: Weighting
 
 ### Variation in design weights (RQ2)
 
-Using the sampling design described above, all sample members were assigned a design weight. As the following table shows, the variance in the design weight variable is `r round(var(society$a_psnenip_xd),2)`. With a mean of `r round(mean(society$a_psnenip_xd), 2)`, the coefficient of variation is only `r round(sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd), 2)`. The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Moreover, the maximum value of this variable suggests trimming of weights greater than 4. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
+Following from the sampling design, all sample members were assigned a design weight. As Table 1 shows, the variance in the design weight variable is `r round(var(society$a_psnenip_xd),2)`. With a mean of `r round(mean(society$a_psnenip_xd), 2)`, the coefficient of variation is only `r round(sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd), 2)`. 
 
-ADD TABLE 1!
+Table 1. *Descriptive statistics of design weight variable 'a_psnenip_xd'*.
+
+Mean | SD | Min. | Max. 
+------------- | ------------- | ------------- | ------------- 
+1.01 | 0.14 | 1 | 4 
+
+The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. This procedure does, however, not affect the coefficient of variation.
+
+Moreover, the maximum value of this variable suggests trimming of weights greater than 4. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). It is therefore reasonable to assume that weight trimming was performed within the current dataset.
+
+A histogram of the design weight variable (see Figure 2) shows a different reason for the low variance: all but 26 respondents have a design weight of exactly 1. This can be attributed to the sampling design, in which, among other things, popluation density within PSUs was used to construct strata. With that, inclusion probabilities of households were roughly equal within strata. The resulting design weights thus represent the discrepancy between the number of observation units in the population, and the proporion of households per stratum selected from the sampling frame. 
+
+![Histogram of design weight variable 'a_psnenip_xd'.](hist.png)
+
 
 ### Computation of enumerated weights (RQ3)
 
 Apart from design weights, each respondent is also assigned an enumerated weight (the variable 'a_psnenip_xw'). This post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.
-	In order to find out, we first turned age into a numeric variable and created dummy variables for all government office regions, with Scotland being the baseline. Sorting the coefficients from lowest to highest yielded the following graph:
 
-```{r}
-#Insert graph
-```
+In order to find out, we first turned age into a numeric variable and created dummy variables for all government office regions, with Scotland being the baseline. Sorting the coefficients from lowest to highest yielded the following graph:
+
+![Coefficients per Government Region.](coef.png)
 
 It is not completely clear which values should be grouped together into four groups, but there are two groups of three regions and one group of two with near-identical weights. As can be seen on the map below, where the regions are numbered from the lowest to the highest weight, the grouping is rather strange.
 
-![pic_gov](GOR.png)
+![Government Regions in Great Britain.](GOR.png) 
 
 The baseline and the other two areas with a weight close to zero are Scotland, London and the West Midlands. Scotland and London are prime candidates to be categories of their own, as Scotland has a strong regional identity and London is the capital of the country. From a data-driven perspective, combining the West Midlands with any region other than London or Scotland does not make sense, as the weight difference between those region and all other regions is relatively big. From a theory-driven perspective, we cannot think of any good reason to combine the West Midlands with London or Scotland: it is not filled with cities nor is it close enough to Scotland to assume a similar population.
 
 When assuming that the regions with a near-identical weight are in the same group and Scotland and London are two seperate categories, only a few possible groupings remain:
 
 1. South East, South West, and North East England are the third category, with Wales and the rest of England being the last category.
-  + This makes some sense theoretically: the three are the very north and south of England, with the remainder being in the middle. Weight-wise however, combining the West Midlands with the areas with far lower weights does not make sense.
+
+This makes some sense theoretically: the three are the very north and south of England, with the remainder being in the middle. Weight-wise however, combining the West Midlands with the areas with far lower weights does not make sense.
 
 2. The same as above, but with the West Midlands grouped with London.
-  + This is more logical weight-wise than the first option, but from a theoretical perspective it is strange to combine the city with a rural area.
+
+This is more logical weight-wise than the first option, but from a theoretical perspective it is strange to combine the city with a rural area.
 
 3. The North West, West Midlands and East of England are the third category, with Wales and the rest of England being the last category.
-  + Weight-wise it is just as logical or illogical as the first option, but from a theoretical standpoint taking three areas in the middle seems to have less of a basis than taking the outer areas like is done in the first option.
+
+Weight-wise it is just as logical or illogical as the first option, but from a theoretical standpoint taking three areas in the middle seems to have less of a basis than taking the outer areas like is done in the first option.
 
 4. The West Midlands alone being the third category, with the rest of England being the fourth.
-  + This fits weight-wise, but why the West Midlands should be taken seperately is a mystery. It is however less absurd than combining it with London: the West Midlands may have unique features that we do not know about, but we do know that it is not a capital like London.
+
+This fits weight-wise, but why the West Midlands should be taken seperately is a mystery. It is however less absurd than combining it with London: the West Midlands may have unique features that we do not know about, but we do know that it is not a capital like London.
 
 In conclusion, the fourth option seems the most likely, as the grouping is logical from a data-driven perspective and while it does not quite make sense theoretically, there is no obvious reason to assume that it is incorrect. The best alternative is the first option, as it makes the most sense from a theoretical perspective.
 
@@ -138,7 +158,7 @@ The backwards logistic regression model shows us that the variables ... are usef
 The predictive accuracy of the stepwise model is ..., where for the full model this was ..
 
 
-## Estimation
+## Part III: Estimation
 
 ### Relationship between age and household composition (RQ5)
 To investigate the relationship between age and household composition, three steps were performed: choosing which age variable would be used, constructing a new variable to represent household composition, and including the appropriate weight in the analysis. 
@@ -152,9 +172,12 @@ The continous variable a_dvage denotes the age of respondents in completed years
 To investigate the relationship between age and household composition, it is necessary to know which households consist of children living at home, and which don't. Presumably, the largest variation between children living at home and those living independently occurs within the age group 15-25 year-olds. If we would use the ten-year intervals to indicate age, we might get less precise estimates, because of the large variance wihtin the age category '10-19 years old'. Therefore, we decided to use an age variable with smaller intervals. Because of the unequal intervals in the age variable with 13 categories, it should be analysed as ordinal variable. To interpret the relationship with household composition, this is not ideal. Ultimately, we decided to use either a_dvage or a_agegr5_dv.
 
 Secondly, to construct a new variable denoting household composition, we used Eurostat as reference. Eurostat distinghuishes three types of variables used to descripte household composition: 
+
 * Household size;
+
 * Number of children;
-* Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
+
+* Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children).
 
 All three household composition indicators were constructed from the data and included per household into a household composition matrix (see Appendix II: R Script). 
 
@@ -174,13 +197,21 @@ After post-stratfication (as we also included post-stratification in the previou
 # References
 
 Boreham, R., Constantine, R. (2008). Understanding Society Innovation Panel Wave 1: Technical Report. National Center for Social Research.
+
 Eurostat. (2018). Household composition statistics [Explainer]. Retrieved via https://ec.europa.eu/eurostat/statistics-explained/pdfscache/29071.pdf.
+
 Kumar, Rohit. (2014). Respondent Selection Methods in Household Surveys. Jharkhand Jounral of Development and Management Studies. XII. 5701-5708. 
+
 Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
+
 Lumley, T. (2018). Survey: analysis of complex survey samples [R package, version 3.34]. Retrieved via https://cran.r-project.org/web/packages/survey/.
+
 R Core Team (2013). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. Retrieved via http://www.R-project.org/.
-Sa??rndal, C.E. and Lunsdstr??m, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131'144.
+
+Sa??rndal, C.E. and Lunsdstrom, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131'144.
+
 Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51'68.
+
 Venables, W. N. & Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth Edition. Springer, New York. ISBN 0-387-95457-0
 
 
@@ -191,14 +222,24 @@ Understanding Society is a large, multi-year panel study of the population in th
 Questions for report:
 (for questions 1-5), please ignore nonresponse errors.
 1. The Innovation panel would interview multiple people from every household, but in the case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a popular method to do within-household selection of respondents?
+
 2. Despite the complex data structure, the design weights as included in the variable 'a_psnenip_xd' have a very low variance. Can you explain why this is the case?
+
 3. Apart from the design weight, an enumerated design weight 'a_psnenip_xw' is also included. Please show using syntax in R how you can calculate this weight.
+
 4. What is the proportion of employed people of working age (15-64) in the population? (use variable 'a_employ')
+
 5. Please investigate the relationship between age and household composition for the population of Great Britain. Take the following steps:
-a. Investigate which age variable you should use (and whether choosing a particular age variable at all matters)
-b. Construct a new variable 'household_composition' from the following four variables: 'a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv'. You may also use information from across household members to do this.
-c. Which weight should you use here?
+
++ Investigate which age variable you should use (and whether choosing a particular age variable at all matters)
+
++ Construct a new variable 'household_composition' from the following four variables: 'a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv'. You may also use information from across household members to do this.
+
++ Which weight should you use here?
 From here on, take nonresponse error into account.
+
 6. Not all sample members you included in questions 1-5 participated in the survey. Use the variable 'a_ivfio' to investigate how many people personally conducted an interview.
+
 7. Repeat your analysis under question 4. Use only the people who personally did an interview. What is your conclusion? Is there a difference between respondents and nonrespondents when it comes to their employment?
+
 8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?

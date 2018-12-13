@@ -16,7 +16,14 @@ require(dplyr)
 
 # Load society dataset
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
+
+# Remove unnecessary columns
+society <- society[,-c(2,3,6,7,15:52, 61, 63, 64, 66:75, 78:80, 82:86, 90, 91, 93)]
+
+# Change variable types
 society$a_dvage <- as.numeric(society$a_dvage)
+
+hist(society$a_strata)
 
 ```
 
@@ -32,28 +39,31 @@ Var <- var(society$a_psnenip_xd)
 Descr <- cbind(t(summary(society$a_psnenip_xd)), Var)
 # Print with up to 2 decimals
 round(Descr, 2)
+
+# Create histogram of design weight values
+hist(society$a_psnenip_xd, 
+     breaks = 8,
+     main = NULL, #"Histogram of design weight variable 'a_psnenip_xd'",
+     xlab = "Value of the design weight")
 ```
 
 ## Question 3
 ```{r}
-# First, make the dataset smaller by removing unnecessary columns
-society_3 <- society[,-c(5:7,9:56,60:75,77:89)]
-
 # Investigate levels of government office region variable
-levels(society_3$a_gor_dv)
-nrow(society_3[society_3$a_gor_dv == "missing",])
-nrow(society_3[society_3$a_gor_dv == "northern ireland",])
+levels(society$a_gor_dv)
+nrow(society[society$a_gor_dv == "missing",])
+nrow(society[society$a_gor_dv == "northern ireland",])
 # None of the value are missing or northern ireland, so those can be ignored
 
 # Run linear regression
-coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + a_gor_dv))
+coeff <- with(society, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + a_gor_dv))
 
 # Get and sort coefficients
 coeff <- coeff$coefficients
 coeff.gor <- sort(coeff[5:15])
 
 # Plot coefficients
-plot(coeff.gor)
+plot(coeff.gor, xlab = "Government Region", ylab = "Coefficient")
 
 # Show coefficients
 coeff.gor
@@ -63,17 +73,17 @@ In accordance with the data, Scotland, London and the West Midlands form one cat
 
 ```{r}
 # Gather grouped region in one variable
-society_3$gor_groups <- "England_Wales"
-society_3$gor_groups[society_3$a_gor_dv=="london"] <- "London"
-society_3$gor_groups[society_3$a_gor_dv == "scotland"] <- "Scotland"
-society_3$gor_groups[society_3$a_gor_dv == "west midlands"] <- "West Midlands"
+society$gor_groups <- "England_Wales"
+society$gor_groups[society$a_gor_dv=="london"] <- "London"
+society$gor_groups[society$a_gor_dv == "scotland"] <- "Scotland"
+society$gor_groups[society$a_gor_dv == "west midlands"] <- "West Midlands"
 
 # Change government office region groups and age into factors
-society_3$gor_groups <- as.factor(society_3$gor_groups)
-society_3$age_fac <- as.factor(society_3$a_dvage)
+society$gor_groups <- as.factor(society$gor_groups)
+society$age_fac <- as.factor(society$a_dvage)
 
 # Rerun linear regression
-coeff2 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
+coeff2 <- with(society, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
 
 # Get coefficients
 coeff2 <- coeff2$coefficients
@@ -95,17 +105,17 @@ In accordance with the results, age is split up in sections of 10 years, with th
 
 ```{r}
 # Assign the levels
-levels(society_3$age_fac) <- c(rep("group0_20", 15), rep("group21_30", 10), 
+levels(society$age_fac) <- c(rep("group0_20", 15), rep("group21_30", 10), 
                                rep("group31_40", 10), rep("group41_50",10), 
                                rep("group51_70", 20), rep("group71_80", 10), 
                                rep("group_80", 22))
 
 # Create table
-with(society_3, table(age_fac,gor_groups))
+with(society, table(age_fac,gor_groups))
 # None of the groups has zero observations
 
 # Run linear regression again
-coeff3 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
+coeff3 <- with(society, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
 
 #Get coefficients
 coeff3 <- coeff3$coefficients

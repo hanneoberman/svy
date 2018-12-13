@@ -23,7 +23,7 @@ require(survey)
 require(sampling)
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 society$a_dvage <- as.numeric(society$a_dvage)
-head(society)
+# head(society)
 ```
 
 **Sampling Design**
@@ -45,7 +45,17 @@ As the following table shows, the variance in the design weight variable is `r v
 Var. <- var(society$a_psnenip_xd) #compute variance in the design weight variable
 Descr. <- cbind(t(summary(society$a_psnenip_xd)), Var.) #combine with other descriptive statistics
 round(Descr., 2) #print with only two decimals
+
 ```
+
+
+```{r echo=FALSE}
+hist(society$a_psnenip_xd, 
+     breaks = 8,
+     main = "Histogram of design weight variable 'a_psnenip_xd'",
+     xlab = "Value of the design weight")
+```
+
 The low variance is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
 
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
