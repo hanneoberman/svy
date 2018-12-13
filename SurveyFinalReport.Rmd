@@ -30,11 +30,10 @@ The aim of this research project is to investigate several properties of the IP 
 # Methods
 
 The data in this research project was obtained by ‘The National Centre for Social Research’ from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included the removal of irrelevant variables from the dataframe, …. (see Appendix II: R Script).
-To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package ‘survey’ (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions ‘svymean’, and ‘...’ are employed to estimate population quantities.
-Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the base R function ‘...’.
+To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package ‘survey’ (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', and ‘svymean’ are employed to estimate population quantities.
+Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package ‘MASS’ (Venables, & Ripley, 2002).
 
 # Results
-
 
 ## Part I: Sampling
 
@@ -87,3 +86,13 @@ When assuming that the regions with a near-identical weight are in the same grou
 
 In conclusion, the fourth option seems the most likely, as the grouping is logical from a data-driven perspective and while it does not quite make sense theoretically, there is no obvious reason to assume that it is incorrect. The best alternative is the first option, as it makes the most sense from a theoretical perspective.
 
+# References
+
+Boreham, R., Constantine, R. (2008). Understanding Society Innovation Panel Wave 1: Technical Report. National Center for Social Research.
+Kumar, Rohit. (2014). Respondent Selection Methods in Household Surveys. Jharkhand Jounral of Development and Management Studies. XII. 5701-5708. 
+Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
+Lumley, T. (2018). Survey: analysis of complex survey samples [R package, version 3.34]. Retrieved via https://cran.r-project.org/web/packages/survey/.
+R Core Team (2013). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. Retrieved via http://www.R-project.org/.
+Sa??rndal, C.E. and Lunsdstr??m, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131???144.
+Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51???68.
+Venables, W. N. & Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth Edition. Springer, New York. ISBN 0-387-95457-0
