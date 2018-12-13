@@ -234,10 +234,23 @@ table(households$hh_type)
 
 # Join to society dataset
 society <- left_join(society, households, by="a_hidp")
+
+# update sampling design 
+Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 ```
 
 ## Question 5d
+```{r}
+tab <- svytable(~a_agegr5_dv + hh_type.x, Design) # creates a contingency table of 
+# The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
 
+# plot the relationshp between age categories and household types. 
+plot(tab, xlab = "age categories", ylab = "household types", col=c("steelblue1","sienna1","plum2","goldenrod1"))
+# BLUE = couple with children
+# PINK = single parent with children
+# Orange = couple without children 
+# yellow = single without children 
+```
 ## Question 6
 ```{r}
 # Summarise a_ivfio
