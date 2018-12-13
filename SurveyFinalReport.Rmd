@@ -57,6 +57,21 @@ https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/ki
 
 It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
 
+
+### Proportion of personal interviews within the sample (RQ6)
+
+Within the data, there is a proportion of sample members that did not personally take part in an interview, potentially leading to nonresponse bias. However, not all of these observations count as nonresponse. Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Accordingly, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together, 485 cases of (partial) unit nonrespons exist within the subset of eligible individuals.
+
+Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
+
+Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
+Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Therefore, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together there are 485 cases of (partial) unit nonrespons within the subset of eligible individuals.
+
+Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
+
+Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
+
+
 ## Part II: Weighting
 
 ### Variation in design weights (RQ2)
@@ -136,8 +151,10 @@ Thirdly, we determided which weighting variable is appropriate to investigate th
 The relationship between age and household composition is the following: ADD RESULTS!!!
 
 ### Proportion of employed people of working age (RQ4)
+43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%.
 
 ### Proportion of employed people of working age, accounting for nonresponse (RQ7)
+After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
 
 # References
