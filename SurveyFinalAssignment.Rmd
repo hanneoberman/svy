@@ -23,7 +23,7 @@ require(survey)
 require(sampling)
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 society$a_dvage <- as.numeric(society$a_dvage)
-head(society)
+# head(society)
 ```
 
 **Sampling Design**
