@@ -241,11 +241,11 @@ Questions for report:
 
 5. Please investigate the relationship between age and household composition for the population of Great Britain. Take the following steps:
 
-a. Investigate which age variable you should use (and whether choosing a particular age variable at all matters)
++ Investigate which age variable you should use (and whether choosing a particular age variable at all matters)
 
-b. Construct a new variable 'household_composition' from the following four variables: 'a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv'. You may also use information from across household members to do this.
++ Construct a new variable 'household_composition' from the following four variables: 'a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv'. You may also use information from across household members to do this.
 
-c. Which weight should you use here?
++ Which weight should you use here?
 From here on, take nonresponse error into account.
 
 6. Not all sample members you included in questions 1-5 participated in the survey. Use the variable 'a_ivfio' to investigate how many people personally conducted an interview.
