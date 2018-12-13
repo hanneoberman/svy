@@ -147,29 +147,34 @@ for (i in seq(0,110,10)+0.5){
 Considering these results, the most logical categories are 0-20, 21-30, 31-40, 41-50, 51-70, 71-80, 81+. Theoretically speaking, the 51-70 category is a bit strange, but due to the rather convincing difference in weights between the 71-80 group and the neighbouring groups, two of the categories between 21 and 70 must be joined, and 51-70 is the most uniform weight-wise.
 
 ```{r}
+# Assign the levels
 levels(society_3$age_fac) <- c(rep("group0_20", 15), rep("group21_30", 10), 
                                rep("group31_40", 10), rep("group41_50",10), 
                                rep("group51_70", 20), rep("group71_80", 10), 
                                rep("group_80", 22))
 
-with(society_3, table(age_fac,))
 
+# Create non-dummy variable for government office groups
+society_3$gor_groups <- "England_Wales"
+society_3$gor_groups[society_3$L == T] <- "London"
+society_3$gor_groups[society_3$S == T] <- "Scotland"
+society_3$gor_groups[society_3$WM == T] <- "West Midlands"
 
-coeff3 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + WM + L
-                             + grouped_gor + age_fac))
+# Create table
+with(society_3, table(age_fac,gor_groups))
+# None of the groups has zero observations
+
+# Run linear regression again
+coeff3 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
 
 #Get coefficients
 coeff3 <- coeff3$coefficients
 coeff3
 ```
 
+The regression analysis reveals which groups were under- and overrepresented in the sample (compared to the population of Great Britain), with higher weights being assigned to underrepresented groups. While the weights are mostly decided by the design weights, the post-stratification does alter them.
 
-There are some clear groupinds in the weights. Inspec
-
-```{r}
-# Calculate weight post-stratified for sex, age and government region.
-```
-
+Females have slightly lower weights than males, indicating that they were overrepresented. For government office region groups, the people from England (excluding London and the Western Midlands) and Wales are the baseline and have the lowest of all weight, and thus were also overrepresented, with Scotland being the most underrepresented, followed by London and then the Western Midlands. With regards to age, the 0-20 group was surprisingly the most overrepresented, forming the baseline for this variable. The 21-30 and 31-40 groups were the most underrepresented and thus had the highest weights, followed by the 80+ group, the 51-70 group, the 41-50 group and finally the 71-80 group, which was by far the most underrepresented.
 
 **Population Estimates**
 *4. What is the proportion of employed people of working age (15-64) in the population?*
