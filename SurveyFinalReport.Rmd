@@ -118,7 +118,22 @@ The predictive accuracy of the stepwise model is ..., where for the full model t
 ## Estimation
 
 ### Relationship between age and household composition (RQ5)
+To investigate the relationship between age and household composition, three steps were performed: choosing which age variable would be used, constructing a new variable to represent household composition, and including the appropriate weight in the analysis. 
 
+Firstly, we investigated which variable to choose representing the age of respondents. There are four variables in the data expressing the age of respondents: a_agegr5_dv, a_agegr10_dv, a_agegr13_dv, a_dvage. The first three are categorical varibles, divided into groups as seen in the UK Labour Force Survey. The fourth variable, a_dvage, is continuous. 
+	The first categorical variable, a_agegr5_dv, contains 15 categories indicating age in five-year partitions up to '70 years or older'. The variable a_agegr10_dv is highly similar, indicating age in ten-year intervals, and consisting of 8 different categories between ages zero and seventy-plus. Finally, a_agegr13_dv consists 13 levels, with unequal age intervals under the age of 20 (namely 0-15, 16-17, and 18-19 years old), five-year intervals between the ages 20 and 64, and a sigle interval containing all ages from 65 years old upward. 
+	The continous variable a_dvage denotes the age of respondents in completed years at the moment the interview took place. This was computed by comparing the date of birth and the interview date, or using an estimate (see estimated age variable a_ageest (n = 22), and imputated age variable a_ageif (n = 55)).
+	To investigate the relationship between age and household composition, it is necessary to know which households consist of children living at home, and which don't. Presumably, the largest variation between children living at home and those living independently occurs within the age group 15-25 year-olds. If we would use the ten-year intervals to indicate age, we might get less precise estimates, because of the large variance wihtin the age category '10-19 years old'. Therefore, we decided to use an age variable with smaller intervals. Because of the unequal intervals in the age variable with 13 categories, it should be analysed as ordinal variable. To interpret the relationship with household composition, this is not ideal. Ultimately, we decided to use either a_dvage or a_agegr5_dv.
+
+Secondly, to construct a new variable denoting household composition, we used Eurostat as reference. Eurostat distinghuishes three types of variables used to descripte household composition: 
+  - Household size;
+  - Number of children;
+  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
+All three household composition indicators were constructed from the data and included per household into a household composition matrix (see Appendix II: R Script). 
+
+Thirdly, we determided which weighting variable is appropriate to investigate the relationship between age and household composition. We want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way. 
+
+The relationship between age and household composition is the following: ADD RESULTS!!!
 
 ### Proportion of employed people of working age (RQ4)
 
