@@ -12,6 +12,7 @@ output: pdf_document
 # Load packages
 require(survey)
 require(sampling)
+require(dplyr)
 
 # Load society dataset
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
@@ -44,22 +45,8 @@ nrow(society_3[society_3$a_gor_dv == "missing",])
 nrow(society_3[society_3$a_gor_dv == "northern ireland",])
 # None of the value are missing or northern ireland, so those can be ignored
 
-# Create dummy variables for government office regions
-society_3$NE <- society_3$a_gor_dv == "north east"
-society_3$NW <- society_3$a_gor_dv == "north west"
-society_3$Y <- society_3$a_gor_dv == "yorkshire and the humber"
-society_3$EM <- society_3$a_gor_dv == "east midlands"
-society_3$WM <- society_3$a_gor_dv == "west midlands"
-society_3$EOE <- society_3$a_gor_dv == "east of england"
-society_3$L <- society_3$a_gor_dv == "london"
-society_3$SE <- society_3$a_gor_dv == "south east"
-society_3$SW <- society_3$a_gor_dv == "south west"
-society_3$W <- society_3$a_gor_dv == "wales"
-society_3$S <- society_3$a_gor_dv == "scotland"
-
-# Run linear regression (Scotland is the baseline for government office region)
-coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y
-                            + EM + WM + EOE + L + SE + SW + W))
+# Run linear regression
+coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + a_gor_dv))
 
 # Get and sort coefficients
 coeff <- coeff$coefficients
@@ -70,6 +57,59 @@ plot(coeff.gor)
 
 # Show coefficients
 coeff.gor
+```
+
+In accordance with the data, Scotland, London and the West Midlands form one category each, with the fourth category containing all other areas.
+
+```{r}
+# Gather grouped region in one variable
+society_3$gor_groups <- "England_Wales"
+society_3$gor_groups[society_3$a_gor_dv=="london"] <- "London"
+society_3$gor_groups[society_3$a_gor_dv == "scotland"] <- "Scotland"
+society_3$gor_groups[society_3$a_gor_dv == "west midlands"] <- "West Midlands"
+
+# Change government office region groups and age into factors
+society_3$gor_groups <- as.factor(society_3$gor_groups)
+society_3$age_fac <- as.factor(society_3$a_dvage)
+
+# Rerun linear regression
+coeff2 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
+
+# Get coefficients
+coeff2 <- coeff2$coefficients
+coeff2.age <- coeff2[7:102]
+
+# Change names of coefficients into numbers
+x <- unlist(strsplit(names(coeff2.age), "age_fac"))
+names(coeff2.age) <- x[x!=""]
+
+# Plot coefficients
+plot(as.numeric(names(coeff2.age)), coeff2.age)
+for (i in seq(10,110,10)+0.5){
+ abline(v=i, col="red") 
+}
+
+```
+
+In accordance with the results, age is split up in sections of 10 years, with the 0-10 and 11-20 as well as the 51-60 and 61-79 categories combined and all people of age 81 and older placed into one group.
+
+```{r}
+# Assign the levels
+levels(society_3$age_fac) <- c(rep("group0_20", 15), rep("group21_30", 10), 
+                               rep("group31_40", 10), rep("group41_50",10), 
+                               rep("group51_70", 20), rep("group71_80", 10), 
+                               rep("group_80", 22))
+
+# Create table
+with(society_3, table(age_fac,gor_groups))
+# None of the groups has zero observations
+
+# Run linear regression again
+coeff3 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + gor_groups + age_fac))
+
+#Get coefficients
+coeff3 <- coeff3$coefficients
+coeff3
 ```
 
 # Population Estimates
@@ -118,5 +158,113 @@ Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t kn
 svymean(~employ_dv, Nonmiss)
 confint(svymean(~employ_dv, Nonmiss))
 # 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%
+```
+
+## Question 5b
+```{r}
+# Inspect levels of variables
+levels(society$a_livesp_dv)
+levels(society$a_cohab_dv)
+levels(society$a_single_dv)
+levels(society$a_mastat_dv)
+
+###### HOUSEHOLD SIZE PER HOUSEHOLD
+# a_hidp - Household identifier
+# Household size: count for each household, how many persons there are in.
+# Get household size per household
+count <- as.matrix(table(society$a_hidp))
+summary(count)
+# Turn into dataframe and join to society 
+households <- data.frame(a_hidp=as.numeric(rownames(count)), hh_size=count)
+
+##### NUMBER OF CHILDREN PER HOUSEHOLD
+# Count the number of kids under the age of 16 using the mastat variable
+for(i in households$a_hidp){
+  hh <- society[society$a_hidp==i,]
+  households$n_child[households$a_hidp==i]=as.numeric(table(hh$a_mastat_dv)["Child under 16"])
+}
+
+##### ANY CHILDREN IN HOUSEHOLD
+# Create variable whether the household has children in it (True for households with children)
+households$with_child <- households$n_child > 0
+
+##### ANY SINGLE ADULTS IN HOUSEHOLD
+# Create variable whether the person is a single adult (true) or not (false)
+society$single_adult <- society$a_single_dv == "Yes" & society$a_dvage >= 16
+# Create variable whether there is a single adult in the household
+for(i in households$a_hidp){
+  households$hasSingle[households$a_hidp==i] <- any(society$single_adult[society$a_hidp==i])
+}
+
+##### ANY COUPLES IN HOUSEHOLD
+# Create variable whether the person is in a couple (true) or not (false)
+society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes"
+# Create variable whether there is a couple in the household
+for(i in households$a_hidp){
+  households$hasCouple[households$a_hidp==i] <- any(society$inacouple[society$a_hidp==i])
+}
+
+##### HOUSEHOLD TYPE 
+# Create matrix containing household states
+household_states <- matrix(c("Couple with children", "Couple without children", 
+                             "Single with children", "Single without children"), nrow=2)
+# Create household info variable
+households$hh_type <- ""
+
+for (i in seq(1,nrow(households))){
+  # Get right row of household state
+  if (households$with_child[i]){
+    child = 1
+  }
+  else child = 2
+  
+  # Get right column of household state
+  if(households$hasCouple[i]){
+    state = 1
+  }
+  else if(households$hasSingle[i]){
+    state = 2
+  }
+  # Select household state and put in households$hh_type
+  households$hh_type[i] <- household_states[child, state]
+}
+
+# Show how many of each category there are
+table(households$hh_type)
+
+# Join to society dataset
+society <- left_join(society, households, by="a_hidp")
+```
+
+## Question 5d
+
+## Question 6
+```{r}
+# Summarise a_ivfio
+(summary <- summary(society$a_ivfio))
+summary[summary != 0]
+adults <- sum(society$a_ivfio == "Full interview") #the full interviews with adults
+youths <- sum(society$a_ivfio ==  "Youth Interview") #the interviews with children
+sum(adults, youths) #all personally completed interviews
+
+# The nonresponse indicator is 1 for all (partial) nonresponse and 0 for full (youth) interviews
+society$NR <- 1
+society$NR[society$a_ivfio == "Youth Interview"] <- 0
+society$NR[society$a_ivfio == "Full interview"] <- 0
+```
+
+
+## Question 7
+```{r}
+# Further investigate the level Language difficulties
+society$a_iproxy[society$a_ivfio=="Language difficulties"]
+# It's clearly a complete nonresponse
+
+# Create model
+I_personal <- with(Nonmiss, subset(Design, NR==0))
+                   
+# Calculate nonresponse
+svymean(~employ_dv, I_personal)
+confint(svymean(~employ_dv, I_personal))
 ```
 
