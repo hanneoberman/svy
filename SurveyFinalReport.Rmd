@@ -34,7 +34,7 @@ To estimate population quantities from sample data, broadly two strategies can b
 To obtain the sample from the sampling frame, multistage stratified cluster sampling was used. Postal sectors acted as primary sampling units (PSUs) in the cluster design, and were sorted by Government Office Region. Within these regions, strata were constructed based on a.o. non-manual occupations, ethnic minority density, and population density. After stratification, a sample was drawn from the  sampling frame (the Postcode Address File), with probabilities proportional to the number of postal delivery points within each postcode sector (the stratified PSUs). Per postcode sector, 23 addresses were selected, yielding a total of 2760 addresses. However, interviews were only achieved in 1489 households (Boreham, & Constantine, 2008).
 [Add paragraph about Non-sampling, sampling, and nonresponse errors].
 
-The aim of this research project is to investigate several properties of the IP data, with respect to the sampling procedure, the use of weights in survey data analysis, and to estimate population quantities from the sample. The report is based on eight research questions (RQs) that were provided in the research proposal (Appendix I). The RQs are structured according to three topics: sampling, weighting, and estimation. In the sampling part, we investigate how within-household selection of respondents was performed (RQ1), and how many people within the sample personally conducted an interview (RQ6). The part concerning survey weights encompasses a theoretical explanation for the variation between design weights across observations (RQ2), computation of enumerated weights (RQ3), and an effort to suggest variables that could be used to construct nonresponse weights. Finally, in the third part population quantities are estimated: the relationship between age and household composition (RQ5), and the proportion of employed people of working age in the population with and without accounting for nonresponse (RQ4 and RQ7, respectively). The exact formulation of the research questions can be found in Appendix I: Research Proposal.
+The aim of this research project is to investigate several properties of the IP data, with respect to the sampling procedure, the use of weights in survey data analysis, and to estimate population quantities from the sample. The report is based on eight research questions (RQs) that were provided in the research proposal (Appendix I). The RQs are structured according to three topics: sampling, weighting, and estimation. In the sampling part, we investigate how within-household selection of respondents was performed (RQ1), and how many people within the sample personally conducted an interview (RQ6). The part concerning survey weights encompasses a theoretical explanation for the variation between design weights across observations (RQ2), computation of enumerated weights (RQ3), and an effort to suggest variables that could be used to construct nonresponse weights (RQ8). Finally, in the third part population quantities are estimated: the relationship between age and household composition (RQ5), and the proportion of employed people of working age in the population with and without accounting for nonresponse (RQ4 and RQ7, respectively). The exact formulation of the research questions can be found in Appendix I: Research Proposal.
 
 # Methods
 
@@ -63,9 +63,11 @@ It is a popular method because when carried out correctly, it leads to (almost) 
 
 Using the sampling design described above, all sample members were assigned a design weight. As the following table shows, the variance in the design weight variable is `r round(var(society$a_psnenip_xd),2)`. With a mean of `r round(mean(society$a_psnenip_xd), 2)`, the coefficient of variation is only `r round(sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd), 2)`. The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Moreover, the maximum value of this variable suggests trimming of weights greater than 4. Trimming, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
 
+ADD TABLE 1!
+
 ### Computation of enumerated weights (RQ3)
 
-The post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.
+Apart from design weights, each respondent is also assigned an enumerated weight (the variable 'a_psnenip_xw'). This post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.
 
 In order to find out, we first turned age into a numeric variable and created dummy variables for all government office regions, with Scotland being the baseline. Sorting the coefficients from lowest to highest yielded the following graph:
 
@@ -94,6 +96,34 @@ When assuming that the regions with a near-identical weight are in the same grou
 - This fits weight-wise, but why the West Midlands should be taken seperately is a mystery. It is however less absurd than combining it with London: the West Midlands may have unique features that we do not know about, but we do know that it is not a capital like London.
 
 In conclusion, the fourth option seems the most likely, as the grouping is logical from a data-driven perspective and while it does not quite make sense theoretically, there is no obvious reason to assume that it is incorrect. The best alternative is the first option, as it makes the most sense from a theoretical perspective.
+
+
+### Construction of nonresponse weights (RQ8)
+
+Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
+
+If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. Different choices of auxiliary variables lead to different weights. In order to the weights to be useful, it is important to use powerful auxiliary variables (Brick, 2013).
+
+The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or S??rndal and Lundstr??m's (2010) paper.  
+We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) S??rndal and Lundstr??m's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict nonresponse. 
+
+There are two stages of nonresponse we would have wanted to consider: 
+* person nonresponse: whether a personal interview was conducted yes or no;
+* household nonresponse: defined as completian of at least the household grid.
+However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occured in 13.5% of the observations in the sample.
+
+The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
+The predictive accuracy of the stepwise model is ..., where for the full model this was ..
+
+## Estimation
+
+### Relationship between age and household composition (RQ5)
+
+
+### Proportion of employed people of working age (RQ4)
+
+### Proportion of employed people of working age, accounting for nonresponse (RQ7)
+
 
 # References
 
