@@ -96,3 +96,47 @@ R Core Team (2013). R: A language and environment for statistical computing. R F
 Sa??rndal, C.E. and Lunsdstr??m, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131???144.
 Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51???68.
 Venables, W. N. & Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth Edition. Springer, New York. ISBN 0-387-95457-0
+
+
+# Appendix I: Research Proposal
+
+Understanding Society is a large, multi-year panel study of the population in the United
+Kingdom and Northern Ireland. The dataset that you will analyse is wave 1 of the Understanding
+Society Innovation Panel, which is used for testing instruments. The Innovation panel (IP) uses
+the same sampling procedure as the main Understanding Society Survey, apart from the fact
+that Northern Ireland is not included. Sampling is done using a multistage stratified cluster
+sample. For more information, see
+https://www.understandingsociety.ac.uk/sites/default/files/downloads/documentation/innovat
+ion-panel/user-guides/ip_user_guide.pdf Within this file, further references are made to the
+sampling and weighting guidelines. Do read these, because this will be important for the rest of
+the analyses. The data file you need for this assignment is “understanding society innovation panel wave
+A.RDS”.
+
+Questions for report:
+(for questions 1-5), please ignore nonresponse errors.
+1. The Innovation panel would interview multiple people from every household, but in the
+case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a
+popular method to do within-household selection of respondents?
+2. Despite the complex data structure, the design weights as included in the variable
+“a_psnenip_xd” have a very low variance. Can you explain why this is the case?
+3. Apart from the design weight, an enumerated design weight “a_psnenip_xw” is also
+included. Please show using syntax in R how you can calculate this weight.
+4. What is the proportion of employed people of working age (15-64) in the population?
+(use variable “a_employ”)
+5. Please investigate the relationship between age and household composition for the
+population of Great Britain. Take the following steps:
+a. Investigate which age variable you should use (and whether choosing a particular age
+variable at all matters)
+b. Construct a new variable “household_composition” from the following four
+variables: “a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv”. You may also use
+information from across household members to do this.
+c. Which weight should you use here?
+From here on, take nonresponse error into account.
+6. Not all sample members you included in questions 1-5 participated in the survey. Use
+the variable “a_ivfio” to investigate how many people personally conducted an
+interview.
+7. Repeat your analysis under question 4. Use only the people who personally did an
+interview. What is your conclusion? Is there a difference between respondents and
+nonrespondents when it comes to their employment?
+8. Using only variables from this dataset, can you find variables which could potentially be
+useful for constructing nonresponse weights? Why these variables?
