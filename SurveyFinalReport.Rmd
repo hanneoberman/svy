@@ -16,7 +16,7 @@ society$a_dvage <- as.numeric(society$a_dvage)
 
 # Abstract
 
-In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the R package 'survey', and base R operations. [Add sentences about results and discussion!].\
+In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the R package 'survey', and base R operations. **[Add sentences about results and discussion!]**.\
 *Key terms*: survey package, design weights, adjustment weights, nonresponse.
 
 # Table of Contents
@@ -32,7 +32,8 @@ Appendix II: R Script
 # Introduction
 
 To estimate population quantities from sample data, broadly two strategies can be employed: model-based inference and design-based inference (Lohr, 2010). In this technical report, the effect of the latter on population estimates is investigated, by means of analyzing a single wave of Great Britain's  multi-year panel study 'Understanding Society'. This annual household panel survey is used to assess topics like housing, education, health, and employment among the general population of the United Kingdom. More specifically, we focus on the a subset of first wave, conducted between 2008 and 2009: the 'Innovation Panel' (IP). 
-	The purpose of the IP was to enable methodological research, before initiating the main 'Understanding Society' survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population.
+
+The purpose of the IP was to enable methodological research, before initiating the main 'Understanding Society' survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population.
 	
 To obtain the sample from the sampling frame, multistage stratified cluster sampling was used. Postal sectors acted as primary sampling units (PSUs) in the cluster design, and were sorted by Government Office Region. Within these regions, strata were constructed based on a.o. non-manual occupations, ethnic minority density, and population density. After stratification, a sample was drawn from the  sampling frame (the Postcode Address File), with probabilities proportional to the number of postal delivery points within each postcode sector (the stratified PSUs). Per postcode sector, 23 addresses were selected, yielding a total of 2760 addresses. However, interviews were only achieved in 1489 households (Boreham, & Constantine, 2008).\
 
@@ -42,7 +43,7 @@ The aim of this research project is to investigate several properties of the IP 
 
 # Methods
 
-The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included the removal of irrelevant variables from the dataframe (see Appendix II: R Script).
+The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included recoding the variable 'a_dvage' as numeric instead of factor, and removal of irrelevant variables from the dataframe (see Appendix II: R Script).
 
 To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', and 'svymean' are employed to estimate population quantities.
 Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package 'MASS' (Venables, & Ripley, 2002).
@@ -58,9 +59,8 @@ For the Understanding Society study, up to three households per dwelling and up 
 
 This method considered to lead to a random sample of household members, and avoids selection bias in the survey. When using the Kish Grid method, the researcher has to list all eligible household members and assign each of them a number i. The Kish Grid then helps you pick a random person i within the n^th^ household you're investigating, see Figure 1. 
 
-**https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png (picture source)**
-
-Figure 1. Kish Grid.
+![Kish Grid. *Note*. Reprinted from https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png](kish-grid.png)
+ 
 
 It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
 
@@ -97,30 +97,20 @@ Moreover, the maximum value of this variable suggests trimming of weights greate
 
 A histogram of the design weight variable (see Figure 2) shows a different reason for the low variance: all but 26 respondents have a design weight of exactly 1. This can be attributed to the sampling design, in which, among other things, popluation density within PSUs was used to construct strata. With that, inclusion probabilities of households were roughly equal within strata. The resulting design weights thus represent the discrepancy between the number of observation units in the population, and the proporion of households per stratum selected from the sampling frame. 
 
-
-```{r echo=FALSE}
-hist(society$a_psnenip_xd, 
-     breaks = 8,
-     main = "Histogram of design weight variable 'a_psnenip_xd'",
-     xlab = "Value of the design weight")
-```
-
-*Figure 2*. Histogram of design weight variable 'a_psnenip_xd'.
-
+![Histogram of design weight variable 'a_psnenip_xd'.](hist.png)
 
 
 ### Computation of enumerated weights (RQ3)
 
 Apart from design weights, each respondent is also assigned an enumerated weight (the variable 'a_psnenip_xw'). This post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.
-	In order to find out, we first turned age into a numeric variable and created dummy variables for all government office regions, with Scotland being the baseline. Sorting the coefficients from lowest to highest yielded the following graph:
 
-```{r}
-#Insert graph
-```
+In order to find out, we first turned age into a numeric variable and created dummy variables for all government office regions, with Scotland being the baseline. Sorting the coefficients from lowest to highest yielded the following graph:
+
+![Coefficients per Government Region.](coef.png)
 
 It is not completely clear which values should be grouped together into four groups, but there are two groups of three regions and one group of two with near-identical weights. As can be seen on the map below, where the regions are numbered from the lowest to the highest weight, the grouping is rather strange.
 
-![pic_gov](GOR.png) 
+![Government Regions in Great Britain.](GOR.png) 
 
 The baseline and the other two areas with a weight close to zero are Scotland, London and the West Midlands. Scotland and London are prime candidates to be categories of their own, as Scotland has a strong regional identity and London is the capital of the country. From a data-driven perspective, combining the West Midlands with any region other than London or Scotland does not make sense, as the weight difference between those region and all other regions is relatively big. From a theory-driven perspective, we cannot think of any good reason to combine the West Midlands with London or Scotland: it is not filled with cities nor is it close enough to Scotland to assume a similar population.
 
@@ -218,7 +208,7 @@ Lumley, T. (2018). Survey: analysis of complex survey samples [R package, versio
 
 R Core Team (2013). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. Retrieved via http://www.R-project.org/.
 
-Sa??rndal, C.E. and Lunsdstrom, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131'144.
+Saarndal, C.E. and Lundstrom, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131'144.
 
 Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51'68.
 
