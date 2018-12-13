@@ -13,18 +13,16 @@ output: pdf_document
 require(survey)
 require(sampling)
 require(dplyr)
+require(MASS)
 
 # Load society dataset
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 
 # Remove unnecessary columns
-society <- society[,-c(2,3,6,7,15:52, 61, 63, 64, 66:75, 78:80, 82:86, 90, 91, 93)]
+# society <- society[,-c(2,3,6,7,15:52, 61, 63, 64, 66:75, 78:80, 82:86, 90, 91, 93)]
 
 # Change variable types
 society$a_dvage <- as.numeric(society$a_dvage)
-
-hist(society$a_strata)
-
 ```
 
 # Sampling design
@@ -264,11 +262,95 @@ society$NR[society$a_ivfio == "Full interview"] <- 0
 society$a_iproxy[society$a_ivfio=="Language difficulties"]
 # It's clearly a complete nonresponse
 
+# Repeat creation of model design from Q4 so NR variable is included
+Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
+Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
 # Create model
-I_personal <- with(Nonmiss, subset(Design, NR==0))
+I_personal <- with(Nonmiss, subset(Nonmiss, NR==0))
                    
 # Calculate nonresponse
 svymean(~employ_dv, I_personal)
 confint(svymean(~employ_dv, I_personal))
 ```
 
+## Question 8
+```{r}
+# Investigate the nonresponse
+mean(society$NR) # compute proportion nonresponders
+# Look at levels of household response
+summary(society$a_hhresp_dv) 
+# All households at least filled in the grid, so we only look into person (unit) nonresponse.
+
+#### Changes made:
+# - Removed ageest and ageif: Not informative, too many inapplicables
+# - Removed a_marstat > a_mastat_dv contains the same information, but with fewer levels
+# - Removed a_livewith > a_livewith_dv contains the same information, but with unmarried people being 'no' instead of 'inapplicable' > maybe switch?
+# - Removed a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
+# - Removed a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
+
+
+#### Problematic variables:
+# a_racel_dv > maybe fuse different backgrounds?
+
+# a_employ > Only problematic for the two missing cases (remove those?)
+
+# a_dvage > Children under ten are all counted as missing, as they were not interviewed (remove those?)
+# Same problem with a_agegr5_dv, a_agegr10_dv. Also very similar, maybe take one?
+# a_mastat_dv: Don't know == nonresponse (7 cases), seperated but legally married == response (55 cases)
+
+# a_livewith: 2 cases of same-sex couples, maybe include in 'yes'?
+# To change levels: 
+# 1.Remove any variables with 0 observations to make things easier with:
+# society$a_livewith <- factor(society$a_livewith)
+# 2. Look at levels:
+# levels(society$a_livewith)
+# 3. Copy the levels, in the same order, and change the ones you want to change:
+# levels(society$a_livewith) <- c("inapplicable", "yes", "no", "yes")
+# Then the same-sex couples are under 'yes'
+
+society[society$a_nchild_dv==6,]
+
+# Possibly superfluous variables:
+# a_dvage, a_agegr5_dv, a_agegr10_dv and a_agegr13_dv all include age
+# a_rach16_dv is only about the primary caretaker: if there are two parents and one child, only one of the two will be primary caretaker
+
+# Combine respm16_dv and respf16_dv
+society$a_resp16_dv <- "No"
+society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes"] <- "Yes" 
+
+class(society$a_nchild_dv)
+summary(society$a_nchild_dv)
+with(society, as.matrix(table(a_nchild_dv, NR)))
+plot(society$a_nchild_dv, society$NR)
+
+society[society$a_respf16_dv=="Yes" & society$a_rach16_dv=="No",]
+
+# model with all predictors
+fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                   a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_mastat_dv + a_livesp_dv +  a_livewith + a_cohab_dv +
+                   a_single_dv + a_depchl_dv + a_rach16_dv + a_resp16_dv + 
+                   a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
+
+fullmodel$coefficients
+
+# running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 
+
+# model without any predictors
+emptymodel <- nothing <- glm(NR ~ 
+                             1,
+                             family=binomial, data = society )
+summary(emptymodel)
+
+# backwards selection
+backwards <- step(fullmodel)
+summary(backwards)
+
+# forwards selection to compare backwards model with it. 
+forwards <- step(emptymodel,
+scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
+
+# show different models: 
+formula(fullmodel)
+formula(backwards)
+```

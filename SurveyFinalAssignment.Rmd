@@ -480,10 +480,10 @@ It looks like household nonresponse cannot be identified in this dataset. The le
 
 Second, we need to identify the variables we want to put into our stewpise logistic regression. Logically, we would use all variables in our dataset but before we do that we need to check the assumptions of logistic regression: 
 
-#1 DV on dichotomous scale
-#2 IV(s) should be on continuous or categorical scale 
-#3 Independence of observations + the dependent variable should have mutually exclusive and exhaustive categories.
-#4 Linear relationship between any continuous independent variables and the logit transformation of the dependent variable. 
+1. DV on dichotomous scale
+2. IV(s) should be on continuous or categorical scale 
+3. Independence of observations + the dependent variable should have mutually exclusive and exhaustive categories.
+4. Linear relationship between any continuous independent variables and the logit transformation of the dependent variable. 
 
 We know that assumptions 1-3 hold. We can check assumption 4 with the Box's M test.
 Some other issues we have to deal with: 
@@ -496,7 +496,7 @@ Third, we apply selection strategy:
 
 
 ```{r}
-require(MASS)
+
 # model with all predictors
 fullmodel <- glm(NR ~ 
                    a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
