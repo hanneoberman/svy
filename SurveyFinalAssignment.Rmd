@@ -1,7 +1,8 @@
 ---
 title: "Understanding Society"
-output: 
-  html_notebook: 
+output:
+  pdf_document: default
+  html_notebook:
     theme: paper
 ---
 
@@ -57,33 +58,40 @@ The weight a_psnenip_xw was calculated using the design weights (a_psnenip_xd), 
 
 ```{r}
 # First, make the dataset smaller by removing unnecessary columns
-society_4 <- society[,-c(5:7,9:56,60:75,77:89)]
+society_3 <- society[,-c(5:7,9:56,60:75,77:89)]
 
-# To do so, we need to create dummy variables for government regions
-levels(society_4$a_gor_dv)
-society_4[society_4$a_gor_dv == "missing",]
-society_4[society_4$a_gor_dv == "northern ireland",]
+# Investigate levels of government office region variable
+levels(society_3$a_gor_dv)
+nrow(society_3[society_3$a_gor_dv == "missing",])
+nrow(society_3[society_3$a_gor_dv == "northern ireland",])
 # None of the value are missing or northern ireland, so those can be ignored
-society_4$NE <- society_4$a_gor_dv == "north east"
-society_4$NW <- society_4$a_gor_dv == "north west"
-society_4$Y <- society_4$a_gor_dv == "yorkshire and the humber"
-society_4$EM <- society_4$a_gor_dv == "east midlands"
-society_4$WM <- society_4$a_gor_dv == "west midlands"
-society_4$EOE <- society_4$a_gor_dv == "east of england"
-society_4$L <- society_4$a_gor_dv == "london"
-society_4$SE <- society_4$a_gor_dv == "south east"
-society_4$SW <- society_4$a_gor_dv == "south west"
-society_4$W <- society_4$a_gor_dv == "wales"
-society_4$S <- society_4$a_gor_dv == "scotland"
-# Scotland is the baseline
 
-coeff <- with(society_4, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y + EM + WM + EOE + L + SE + SW + W))
+# Create dummy variables for government office regions
+society_3$NE <- society_3$a_gor_dv == "north east"
+society_3$NW <- society_3$a_gor_dv == "north west"
+society_3$Y <- society_3$a_gor_dv == "yorkshire and the humber"
+society_3$EM <- society_3$a_gor_dv == "east midlands"
+society_3$WM <- society_3$a_gor_dv == "west midlands"
+society_3$EOE <- society_3$a_gor_dv == "east of england"
+society_3$L <- society_3$a_gor_dv == "london"
+society_3$SE <- society_3$a_gor_dv == "south east"
+society_3$SW <- society_3$a_gor_dv == "south west"
+society_3$W <- society_3$a_gor_dv == "wales"
+society_3$S <- society_3$a_gor_dv == "scotland"
+
+# Run linear regression (Scotland is the baseline for government office region)
+coeff <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + NE + NW + Y
+                            + EM + WM + EOE + L + SE + SW + W))
+
+# Get and sort coefficients
 coeff <- coeff$coefficients
-
-# Let us start with government regions.
 coeff.gor <- sort(coeff[5:15])
-plot(sort(coeff.gor))
 
+# Plot coefficients
+plot(coeff.gor)
+
+# Show coefficients
+coeff.gor
 ```
 
 It is not completely clear which values should be grouped together, despite how nicely the weights are grouped. As can be seen on the map below, where the regions are numbered from the lowest to the highest weight, the grouping is rather strange.
@@ -108,22 +116,60 @@ When assuming that the regions with a near-identical weight are in the same grou
 
 In conclusion, the fourth option seems the most likely, as the grouping is logical from a data-driven perspective and while it does not quite make sense theoretically, there is no evidence that it is incorrect. The best alternative is the first option, as it makes the most sense from a theoretical perspective.
 
+The next step is to decide the age groups
 
 ```{r}
-# To find out which two should be combined, rerun the linear regression with these five groups.
-coeff.gor
-society_4$group1 <- with(society_4, SE==T|NE==T|SW==T)
-society_4$group2 <- with(society_4, W==T|Y==T|EM==T)
-society_4$group3 <- with(society_4, EOE==T|NW==T)
-coeff2 <- with(society_4, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + a_dvage + WM + L + group1 + group2 + group3))
+# Gather grouped region in one dummy variable
+# This is done by creating a dummy variable that is true when London, Scotland and the 
+# Western Midlands are not.
+society_3$grouped_gor <- with(society_3, L!=T & S!=T & WM!=T)
+# Change age into factor
+society_3$age_fac <- as.factor(society_3$a_dvage)
+# It's ordinal, so there is no need to create dummy variables
+
+# Rerun linear regression
+coeff2 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + WM + L
+                             + grouped_gor + age_fac))
+
+# Get coefficients
 coeff2 <- coeff2$coefficients
-coeff2.gov <- sort(coeff2[5:9])
-plot(coeff2.gov)
-coeff2.gov
-# Well, that didn't make any difference
+coeff2.age <- coeff2[7:102]
+
+# Change names of coefficients into numbers
+test <- unlist(strsplit(names(coeff2.age), "age_fac"))
+names(coeff2.age) <- test[test!=""]
+
+# Plot coefficients
+plot(as.numeric(names(coeff2.age)), coeff2.age)
+for (i in seq(0,110,10)+0.5){
+ abline(v=i, col="red") 
+}
+
+```
+
+Considering these results, the most logical categories are 0-20, 21-30, 31-40, 41-50, 51-70, 71-80, 81+. Theoretically speaking, the 51-70 category is a bit strange, but due to the rather convincing difference in weights between the 71-80 group and the neighbouring groups, two of the categories between 21 and 70 must be joined, and 51-70 is the most uniform weight-wise.
+
+```{r}
+levels(society_3$age_fac) <- c(rep("group0_20", 15), rep("group21_30", 10), 
+                               rep("group31_40", 10), rep("group41_50",10), 
+                               rep("group51_70", 20), rep("group71_80", 10), 
+                               rep("group_80", 22))
+
+with(society_3, table(age_fac,))
 
 
-# Calculate household weight (or use design weight?)
+coeff3 <- with(society_3, lm(a_psnenip_xw ~ a_psnenip_xd + a_sex + WM + L
+                             + grouped_gor + age_fac))
+
+#Get coefficients
+coeff3 <- coeff3$coefficients
+coeff3
+```
+
+
+There are some clear groupinds in the weights. Inspec
+
+```{r}
 # Calculate weight post-stratified for sex, age and government region.
 ```
 
@@ -247,7 +293,7 @@ levels(society$a_ivfio)
 There are forty levels, but by looking at the site (https://www.understandingsociety.ac.uk/documentation/innovation-panel/dataset-documentation/wave/1/datafile/a_indall_ip/variable/a_ivfio), we find only 10 appear in the first wave. Of those, only full interview and youth interview indicate interviews that personally did an interview. Language difficulties is a rather neutral description, but looking at the variable i_proxy:
 
 ```{r}
-society$a_iproxy[society$a_ivfio=="Language difficulties",]
+society$a_iproxy[society$a_ivfio=="Language difficulties"]
 ```
 
 Shows that language difficulty also indicates missing data. Thus, only two of the levels indicate a personal interview and thus should be included for this analysis.
