@@ -256,6 +256,9 @@ tab <- svytable(~a_agegr5_dv + hh_type.x, Design) # creates a contingency table 
 
 # plot the relationshp between age categories and household types. 
 plot(tab, xlab = "age categories", ylab = "household types", col=c("steelblue1","sienna1","plum2","goldenrod1"))
+
+# add percentages
+
 # BLUE = couple with children
 # PINK = single parent with children
 # Orange = couple without children 
