@@ -32,6 +32,12 @@ Var <- var(society$a_psnenip_xd)
 Descr <- cbind(t(summary(society$a_psnenip_xd)), Var)
 # Print with up to 2 decimals
 round(Descr, 2)
+
+# Create histogram of design weight values
+hist(society$a_psnenip_xd, 
+     breaks = 8,
+     main = NULL, #"Histogram of design weight variable 'a_psnenip_xd'",
+     xlab = "Value of the design weight")
 ```
 
 ## Question 3
@@ -53,7 +59,7 @@ coeff <- coeff$coefficients
 coeff.gor <- sort(coeff[5:15])
 
 # Plot coefficients
-plot(coeff.gor)
+plot(coeff.gor, xlab = "Government Region", ylab = "Coefficient")
 
 # Show coefficients
 coeff.gor
