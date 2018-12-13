@@ -25,7 +25,7 @@
 \usepackage{hyperref}
 \hypersetup{unicode=true,
             pdftitle={Survey Data Analysis Final Report},
-            pdfauthor={Sanne Meijering; Hanne Oberman; Gerbrich},
+            pdfauthor={Sanne Meijering; Hanne Oberman; Gerbrich Ferdinands},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
@@ -117,7 +117,7 @@
   \title{Survey Data Analysis Final Report}
     \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
-    \author{Sanne Meijering \\ Hanne Oberman \\ Gerbrich}
+    \author{Sanne Meijering \\ Hanne Oberman \\ Gerbrich Ferdinands}
     \preauthor{\centering\large\emph}
   \postauthor{\par}
     \date{}
@@ -195,18 +195,19 @@ household you want to sample. (why?)**
 
 \subsubsection{Question 2}\label{question-2}
 
-Using the sampling design described above, people were assigned design
-weights. As the following table shows, the variance in the design weight
-variable is 0.02. With a mean of 1.01, the coefficient of variation is
-only 0.14. The low variance within the design weight variable can be due
-to rescaling of the weights, as explained in the IP User Guide (p.~56):
-``Each set of weights has been scaled by a constant factor to produce a
-mean of one amongst cases eligible to receive the weight''. That is, the
-design weights are standardized on one. Trimming, truncating, or
-smoothing of weights are techniques to inhibit the effect of a single
-observation on population estimates and its variance. Trimming may yield
-biased estimates, but is shown to decrease the mean square error (MSE;
-Lohr, 2010).
+Using the sampling design described above, all sample mambers were
+assigned a design weight. As the following table shows, the variance in
+the design weight variable is 0.02. With a mean of 1.01, the coefficient
+of variation is only 0.14. The low variance within the design weight
+variable can be due to rescaling of the weights, as explained in the IP
+User Guide (p.~56): ``Each set of weights has been scaled by a constant
+factor to produce a mean of one amongst cases eligible to receive the
+weight''. That is, the design weights are standardized on one. Moreover,
+the maximum value of this variable suggests trimming of weights greater
+than 4. Trimming, truncating, or smoothing of weights are techniques to
+inhibit the effect of a single observation on population estimates and
+its variance. Trimming may yield biased estimates, but is shown to
+decrease the mean square error (MSE; Lohr, 2010).
 
 \subsubsection{Question 3}\label{question-3}
 

@@ -179,7 +179,6 @@ The first categorical variable, a_agegr5_dv, contains 15 categories indicating a
 
 To investigate the relationship between age and household composition, it is necessary to know which households consist of children living at home, and which don't. Presumably, the largest variation between children living at home and those living independently occurs within the age group 15-25 year-olds. If we would use the ten-year intervals to indicate age, we might get less precise estimates, because of the large variance wihtin the age category '10-19 years old'. Therefore, we decided to use an age variable with smaller intervals. Because of the unequal intervals in the age variable with 13 categories, it should be analysed as ordinal variable. To interpret the relationship with household composition, this is not ideal. Ultimately, we decided to use either a_dvage or a_agegr5_dv.
 
-
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
  Eurostat distinghuishes three types of variables used to descripte household composition: 
   - Household size;
