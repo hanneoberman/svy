@@ -31,25 +31,22 @@ head(society)
 "Include descriptions of your frame and target and population, intended sample size, and method of sample selection. Discuss potential non-sampling, sampling, and non-response errors" (Assignment 6, fox, 2018).
 
 *1. The Innovation panel would interview multiple people from every household, but in the case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a popular method to do within-household selection of respondents?*
-
-
-The Kish Grid method is used to select respondents in a household at random. This method considered to lead to a random sample of household members, and avoids selection bias in the survey. 
+The Kish Grid method is used to select respondents in a household at random. This method considered to lead to a random sample of household members, and avoids selection bias in the survey. The Kish Grid is 
 
 It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample. 
+
 
 
 **Design Weights**
 
 *2. Despite the complex data structure, the design weights as included in the variable "a_psnenip_xd" have a very low variance. Can you explain why this is the case?*
-As the following table shows, the variance in the design weight variable is ...
+As the following table shows, the variance in the design weight variable is `r var(society$a_psnenip_xd)`. With a mean of `r mean(society$a_psnenip_xd)`, the coefficient of variation is only `r sqrt(var(society$a_psnenip_xd))/mean(society$a_psnenip_xd)`.
 ```{r} 
 Var. <- var(society$a_psnenip_xd) #compute variance in the design weight variable
 Descr. <- cbind(t(summary(society$a_psnenip_xd)), Var.) #combine with other descriptive statistics
 round(Descr., 2) #print with only two decimals
 ```
-The low variance is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates (Lohr, **year**). 
-
-Lower MSE (Lohr, p. 286), and application from IP User Guide.
+The low variance is due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. Rescaling, truncating, or smoothing of weights are techniques to inhibit the effect of a single observation on population estimates and its variance. Trimming may yield biased estimates, but is shown to decrease the mean square error (MSE; Lohr, 2010). 
 
 *3. Apart from the design weight, an enumerated design weight "a_psnenip_xw" is also included. Please show using syntax in R how you can calculate this weight.*
 
@@ -174,7 +171,7 @@ There are some clear groupinds in the weights. Inspec
 ```
 
 
-**Population Esitimates**
+**Population Estimates**
 *4. What is the proportion of employed people of working age (15-64) in the population?*
 ```{r}
 # First, we investigate the a_employ variable.
@@ -221,67 +218,204 @@ confint(svymean(~employ_dv, Nonmiss))
 
 *5. Please investigate the relationship between age and household composition for the population of Great Britain.*
 
-*a. Investigate which age variable you should use*
-For householdcomposition, with/without children is key.
-Therefore, young children's ages do not matter as much, but 15-20 is expected to have more variance and should thus be over-sampled.
+*a. Investigate which age variable you should use.*
+There are four variables in the data expressing the age of respondents: a_agegr5_dv, a_agegr10_dv, a_agegr13_dv, a_dvage. The first three are categorical varibles, divided into groups as seen in the UK Labour Force Survey. The fourth variable, a_dvage, denotes the age of respondents in completed years at the moment the interview took place. This was computed by comparing the date of birth and the interview date, or using an estimate (see estimated age variable a_ageest (n = 22), and imputated age variable a_ageif (n = 55)).
 
+The first categorical variable, a_agegr5_dv, contains 15 categories indicating age in five-year partitions up to '70 years or older'. The variable a_agegr10_dv is highly similar, indicating age in ten-year intervals, and consisting of 8 different categories between ages zero and seventy-plus. Finally, a_agegr13_dv consists 13 levels, with unequal age intervals under the age of 20 (namely 0-15, 16-17, and 18-19 years old), five-year intervals between the ages 20 and 64, and a sigle interval containing all ages from 65 years old upward. 
+
+To investigate the relationship between age and household composition, it is necessary to know which households consist of children living at home, and which don't. Presumably, the largest variation between children living at home and those living independently occurs within the age group 15-25 year-olds. If we would use the ten-year intervals to indicate age, we might get less precise estimates, because of the large variance wihtin the age category '10-19 years old'. Therefore, we decided to use an age variable with smaller intervals. Because of the unequal intervals in the age variable with 13 categories, it should be analysed as ordinal variable. To interpret the relationship with household composition, this is not ideal. Ultimately, we decided to use either a_dvage or a_agegr5_dv.
 
 *b. Construct a new variable "household_composition" from the following four variables: "a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv".*
-Household composition: 
+ Eurostat distinghuishes three types of variables used to descripte household composition: 
+  - Household size;
+  - Number of children;
+  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
+)
 
 First, create variable household size:
+Compute variable household size, number of children per household, household type
 ```{r}
-# Household size: count for each household, how many persons there are in. 
+levels(society$a_livesp_dv)
+levels(society$a_cohab_dv)
+levels(society$a_single_dv)
+levels(society$a_mastat_dv)
+
+##### HOUSEHOLD SIZE PER HOUSEHOLD
 # a_hidp - Household identifier
-count <- as.matrix(table(society$a_hidp)) # number of occurences of each a_hidp (indicator of size of household)
+# Household size: count for each household, how many persons there are in.
+count <- as.matrix(table(society$a_hidp)) # number of occurrences of each a_hidp (indicator of size of household)
 summary(count)
+households <- rownames(count)
 
 # create variable to assign household size to each individual person 
 society$household_size <- NA 
-for (i in rownames(count)) { # for each household..
+for (i in households) { # for each household..
   society$household_size[society$a_hidp == i] <- count[i,] # maybe this can be written into nicer R code. 
+households <- rownames(count) # all household ID's
+}
+# create 'household_info' to store all the information concerning households
+# columns: household_size, number of children, children yes/no,
+household_info <- matrix(NA, length(households), 5)
+rownames(household_info) <- households
+colnames(household_info) <-
+  c("household_size",
+    "kidsperHousehold",
+    "hasKids",
+    "hasCouple",
+    "household_composition"
+  )
+
+household_info[, "household_size"] <- count
+
+##### HOUSEHOLD SIZE PER PERSON
+society$household_size <- NA
+for (i in households) {
+  # for each household..
+  society$household_size[society$a_hidp == i] <-count[i, ] # assign household size to each individual person 
 }
 
-# household_type 
+##### NUMBER OF CHILDREN PER HOUSEHOLD
+countKids <-
+  function(household) {
+    # function that counts kids for a given household ID
+    count <-
+      as.numeric(table(society$a_mastat_dv[society$a_hidp == household])["Child under 16"])
+    count
+  }
+
+kidsperHousehold <- matrix(NA, length(households), 1) # empty vector to store number of kids per household
+for (i in 1:length(households)) {
+  kidsperHousehold[i,1] <- countKids(households[i]) # store kids per household 
+}
+household_info[, "kidsperHousehold"] <- kidsperHousehold
+
+##### HOUSEHOLD TYPE 
+#### children yes or no 
+# hasKids <- matrix(NA, length(households), 1)
+# hasKids <- kidsperHousehold > 0 # logical to indicate whether household has children T/F
+
+##### HOUSEHOLD TYPE
+#### children yes or no
+household_info[, "hasKids"] <- kidsperHousehold > 0 # to indicate whether household has children 0/1
+society$singleadults <- society$a_single_dv == "Yes"
+
+#### COUPLE YES/NO
+society$inacouple <- society$a_livesp_dv == "Yes" | society$a_cohab_dv == "Yes" # true for all couples
+#hasCouple <- any(society$inacouple[society$a_hidp == households[50]])
+for (i in 1:1489) {
+  household_info[i, "hasCouple"] <- any(society$inacouple[society$a_hidp == households[i]])
+}
+#### SINGLE YES/NO, OTHER..
+society$single <- society$a_single_dv == "Yes" # true for all singles
+#hasCouple <- any(society$inacouple[society$a_hidp == households[50]])
+for (i in 1:1489) {
+  household_info[i, "hasCouple"] <- any(society$inacouple[society$a_hidp == households[i]])
+}
+
+# calculate number of children per household 
+#############################
+cwc <- matrix(NA, 1489, 1) # indicator for couples with children
+cwoc <- matrix(NA, 1489, 1) # indicator for couples without children
+swc <- matrix(NA, 1489, 1) # indicator for single adults with children
+swoc <-matrix(NA, 1489, 1) # indicator for single adults without children
+owc <- matrix(NA, 1489, 1) # indicator for other with children
+owoc <- matrix(NA, 1489, 1) # indicator for other withouth children
+
+for (i in 1:1489) {
+  cwc[i, ] <- # hasCouple = 1 and hasKids = 1
+    household_info[i, "hasCouple"] == 1 &&
+    household_info[i, "hasKids"] == 1 
+  cwoc[i, ] <- # hasCouple = 1, hasKids = 0
+    household_info[i, "hasCouple"] == 1 &&
+    household_info[i, "hasKids"] == 0 
+  swc[i, ] <- # if haskids is true and householdsize - kidsperHousehold = 1: single household with kids
+    household_info[i, "hasKids"] == 1 &&
+    as.numeric(household_info[i, "household_size"]) - as.numeric(household_info[i, "kidsperHousehold"]) == 1 
+  swoc[i, ] <- # if household size = 1 single without children.
+    household_info[i, "household_size"] == 1 
+}
+
+# householdgrouper <- society$a_hidp == i # logical indicator that groups households together
+# society$a_pno[householdgrouper] # 
+household_info[cwc, "household_composition"] <- "Couple with children" # Couples with children
+household_info[cwoc, "household_composition"] <- "Couple without children" # Couples without children
+household_info[swc, "household_composition"] <- "Single with children" # Single with kids
+household_info[swoc, "household_composition"] <-"Single without children" # Singles without kids
+
+for (i in 1:1489) { # create 'other'
+  owc[i, ] <- # if for the rest: hasKids = 1: other with kids
+    is.na(household_info[i, "household_composition"]) &&
+    household_info[i, "hasKids"] == 1 
+  owoc[i, ] <- # for the rest: hasKids = 0: other without kids.
+    is.na(household_info[i, "household_composition"]) &&
+    household_info[i, "hasKids"] == 0 
+}
+
+household_info[owc, "household_composition"] <- "Other with children" # Couples without children
+household_info[owoc, "household_composition"] <- "Other without children" # Couples without children
+
+## turn it into factor variable household_type. 
+household_type <- household_info[, "household_composition"]
+
+household_type <- factor(household_type,
+  labels = c(
+    "Couple with children",
+    "Couple without children",
+    "Single adult with children",
+    "Single adult without children",
+    "Other with children",
+    "Other without children"
+  )
+)
+
+# count of children
+table(household_type) # show how many of each category there are. 
+
+# with /by a_hidp, table the a_mastat_dcv 
 # number of children (according to eurostat properties..)
+##################################################################
 ```
 
-Couple (with/without children)
-Single adult (with/without children)
-Other type of household (with/without children)
 
-Household information data
-a_marstat - Legal marital status
-a_livesp - Living with spouse
-a_livewith - Living as part of a couple in household
-a_adresp15 - Adult responsible for child age < 15
-a_adresp17 - Adult responsible for child age < 17
-a_livesp_dv - Living with spouse
-a_cohab_dv - Living with cohabitee
-a_single_dv - Single in household
-a_mastat_dv - De facto marital status
-a_depchl_dv - Whether person is a dependent child
-a_rach16_dv - Whether responsible for a child under 16
-a_respm16_dv - Whether natural/adoptive/step mother of child under 16
-a_respf16 dv - Whether natural/adoptive/step father of child under 16
-a_nchild_dv - Number of own children in household
-a_ndepchl_dv - Number of own dependent children in household
+TURN THIS MATRIX INTO DATAFRAME (CHANGE CODE AS WELL.. )
+Now, we've got a matrix household_info, containing per household the following information: 
+  - Household size;
+  - Number of children;
+  - Household type, with levels: couple (with/without children), single adult (with/without children), other type of household (with/without children); 
+
+*source* https://ec.europa.eu/eurostat/statistics-explained/index.php/Household_composition_statistics
 
 *c.Which weight should you use here?*
 For this analysis, we want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way.
 
-*Lastly, compute population correlation estimate.*
-
+*Lastly, investigate relationship between age and household composition *
 
 **Non-response**
 
 *6. Not all sample members you included in questions 1-5 participated in the survey. Use the variable "a_ivfio" to investigate how many people personally conducted an interview.*
+
+Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Therefore, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together there are 485 cases of (partial) unit nonrespons within the subset of eligible individuals.
+
+Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
+
+Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
 
 ```{r}
 summary(society$a_ivfio) #what's in the variable?
 adults <- sum(society$a_ivfio == "Full interview") #the full interviews with adults
 youths <- sum(society$a_ivfio ==  "Youth Interview") #the interviews with children
 sum(adults, youths) #all personally completed interviews
+
+NR <- matrix(0, 3600, 1) #create nonresponse indicator
+society <- cbind(society, NR) #add to dataframe
+#the nonresponse indicator is 1 for all (partial) unit nonresponse
+society$NR[which(society$a_ivfio == "Youth: Oth non-int")] <- 1
+society$NR[which(society$a_ivfio == "Proxy interview")] <- 1
+society$NR[which(society$a_ivfio == "Refusal")] <- 1
+society$NR[which(society$a_ivfio == "Other non-intvw")] <- 1
+society$NR[which(society$a_ivfio == "Language difficulties")] <- 1
+society$NR[which(society$a_ivfio == "Too infirm/elderly")] <- 1
+society$NR[which(society$a_ivfio == "Ill/away during survey period")] <- 1
 ```
 
 *7. Repeat your analysis under question 4. Use only the people who personally did an interview. What is your conclusion? Is there a difference between respondents and nonrespondents when it comes to their employment?*
@@ -307,88 +441,103 @@ confint(svymean(~employ_dv, I_personal))
 After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
 *8. Using only variables from this dataset, can you find variables which could potentially be useful for constructing nonresponse weights? Why these variables?*
+There are several types of nonrepsonse (unit nonresponse, household nonresponse, item nonresponse, and attrition). We're going to look into auxiliary variables that can be useful for constructing weights for unit nonresponse. 
+
 Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
 
-If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. 
+If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. Different choices of auxiliary variables lead to different weights. In order to the weights to be useful, it is important to use powerful auxiliary variables (Brick, 2013).
 
-/Schouten (2007) says: We propose a selection strategy of weighting variables that minimises the width of the bias interval. The strategy is a forward inclusion-backward elimination algorithm of auxiliary variables similar to algorithms applied in regression analysis. Variables are included or eliminated based on jackknife estimates of the mean and standard deviation of the change in interval width. 
-"We propose a selection strategy of weighting variables that minimises the width of the bias interval. The strategy is a forward inclusion-backward elimination algorithm of auxiliary variables similar to algorithms applied in regression analysis. Variables are included or eliminated based on jackknife estimates of the mean and standard deviation of the change in interval width./
+The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or S??rndal and Lundstr??m's (2010) paper.  
 
-/The IP User Guide states "that all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05."
-???Note that all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05. Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight. In consequence, weights which are defined as equal (e.g. D_HHDENIP_XW AND D_PSNENIP_XW for the refreshment sample) will not necessarily have the same numeric value, but will retain the same between-person/household relative value??? (IP User Guide, p. 56). /
+We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) S??rndal and Lundstr??m's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict non-response. 
 
 Steps we want to undertake:
 1. Identify nonresponse
-2. Come up with strategy to identify useful auxiliary variables
-3. Select auxiliary variables 
+2. Identify pool of all possible auxiliary variables 
+3. Apply stepwise backwards logistic regression of possible auxiliary variables on nonresponse indicator. 
+4. Identify auxiliary variables useful in predicting nonresponse. 
 
 ?need to compare every auxiliary variable individually? 
 
 First, we need to divide the population in the respondents and nonrespondents
-There are two stages of nonresponse here: 
-* individual nonresponse: whether a personal interview was conducted yes or no
+There are two stages of nonresponse we want to consider: 
+* person nonresponse: whether a personal interview was conducted yes or no
 * household nonresponse: defined as completian of at least the household grid 
 
 ```{r}
-society$person_response <- society$a_ivfio ==  "Youth Interview" | society$a_ivfio == "Full interview" # indicator of whether person conducted a personal interview (response)
-1-mean(society$person_response) # proportion of individual nonresponse
-levels(society$a_hhresp_dv) # looks like all households at least filled in the grid. 
+society$NR # non response indicator (see Q6)
+mean(society$NR) # compute proportion nonresponders
+levels(society$a_hhresp_dv) # looks like all households at least filled in the grid, so we only look into person (unit) nonresponse. 
 ```
-Individual nonresponse is 26.2%
-It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid (maybe this is the case for wave 1?). According to user guide, this respons should be 1about 59%. CHECK. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
+Individual nonresponse is 13.5%
 
-/Person response: 
-The enumerated person weight (A_PSNENIP_XW) is defined for all persons in
-households that participated in IP1. The weight equals the IP1 household weight,
-post-stratified by age, sex, and grouped Government Office Region. The post-
-stratification targets are taken from Office for National Statistics 2008 mid-year
-population statistics. /
+It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid. Even though according to the user guide, the household response should be about 59%. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
 
-Second, we want to come up with a strategy in how to select the most appropriate auxiliary variables to construct nonresponse weights. There are several ways to do this: 
-- algorithm 
-- statistical (stepwise) logistic regression: which auxiliary variables are best in predicting individual nonresponse. 
-- user guide indicates sex and gender as auxiliary variables. Women and older people are more prone to respond.  
+Second, we need to identify the variables we want to put into our stewpise logistic regression. Logically, we would use all variables in our dataset but before we do that we need to check the assumptions of logistic regression: 
+
+#1 DV on dichotomous scale
+#2 IV(s) should be on continuous or categorical scale 
+#3 Independence of observations + the dependent variable should have mutually exclusive and exhaustive categories.
+#4 Linear relationship between any continuous independent variables and the logit transformation of the dependent variable. 
+
+We know that assumptions 1-3 hold. We can check assumption 4 with the Box's M test.
+Some other issues we have to deal with: 
+- Some of the possible predictors have complete separation for the non-response variable. We will exclude these variables from the model, because they can render unstable regression estimates with very large standard deviations. 
+- Multicollinearity between IVs. We think multicollinearity of IVs (for example the different age variables) shouldn't be a problem, since it isn't a strict assumption for logistic regression. 
+
+The method of stepwise logistic regression allows us to look into interactions between auxiliary variables, but in practice this is almost never used (Bick, 2013). However, we do think it is interesting to look into, but because it will make our analysis much more complicated and more difficult to interpret, so for this assignment we will not look into it.
 
 Third, we apply selection strategy:
+
+
 ```{r}
-auxiliaries <- subset(society, select = c("a_hidp")) #matrix of all possible auxiliary variables 
+require(MASS)
+# model with all predictors
+fullmodel <- glm(NR ~ 
+                   a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                   a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
+                   a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
+                   a_nchild_dv + a_ndepchl_dv 
+                   # don't forget to include self-made variables:
+                   #household_type + household_size + children
+                   , family = binomial, data = society)
+
+# running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 
+
+# model without any predictors
+emptymodel <- nothing <- glm(NR ~ 
+                             1,
+                             family=binomial, data = society )
+summary(emptymodel)
+
+# backwards selection
+backwards <- step(fullmodel)
+summary(backwards)
+
+# forwards selection to compare backwards model with it. 
+forwards <- step(emptymodel,
+scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
+
+# show different models: 
+formula(fullmodel)
+formula(backwards)
+
+
 ```
-? don't include weights in svy_design as well when doing logistic regression because they're already corrected for nonresponse..? or aren't they? 
 
-Identifiers of person
-a_gor_dv - Government office region
-a_urban_dv - Urban or rural area, derived
+The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
+The predictive accuracy of the stepwise model is ..., where for the full model this was ... 
 
-Personal data
-a_sex - Sex
-a_racel_dv - Ethnic group
-a_employ - employment status
-a_ageest - Estimated age
-a_ageif - Age last birthday
-a_dvage - Age for whole sample
-a_agegr5_dv - Age group: 5-year intervals
-a_agegr10_dv - Age group: 10-year intervals
-a_agegr13_dv - Age group: 13 categories
-
-Household information data
-a_marstat - Legal marital status
-a_livesp - Living with spouse
-a_livewith - Living as part of a couple in household
-a_adresp15 - Adult responsible for child age < 15
-a_adresp17 - Adult responsible for child age < 17
-a_livesp_dv - Living with spouse
-a_cohab_dv - Living with cohabitee
-a_single_dv - Single in household
-a_mastat_dv - De facto marital status
-a_depchl_dv - Whether person is a dependent child
-a_rach16_dv - Whether responsible for a child under 16
-a_respm16_dv - Whether natural/adoptive/step mother of child under 16
-a_respf16 dv - Whether natural/adoptive/step father of child under 16
-a_nchild_dv - Number of own children in household
-a_ndepchl_dv - Number of own dependent children in household
-
-Interview data
-a_hhresp_dv - Household response status
+Create some tables showing response rates for different categories for the selected variables:
+``` {r}
+table(society$person_response)
+table(society$person_response, )
+table(as.matrix(society$person_response), as.matrix(society$a_sex), dnn = c("response", "sex"))
+```
 
 **References**
+Kumar, Rohit. (2014). Respondent Selection Methods in Household Surveys. Jharkhand Jounral of Development and Management Studies. XII. 5701-5708. 
 Lohr, S. (2010). Sampling: Design and Analysis (second edition). Brooks/Cole, Boston, USA.
+Sa??rndal, C.E. and Lunsdstr??m, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131???144.
+Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51???68.
