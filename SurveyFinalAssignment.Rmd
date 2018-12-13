@@ -518,6 +518,12 @@ fullmodel <- glm(NR ~
                    #household_type + household_size + children
                    , family = binomial, data = society)
 
+halffullmodel <- glm(NR ~ 
+  a_gor_dv + a_urban_dv + a_sex + a_racel_dv +
+  a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+  household_size + singleadults + inacouple + single
+  ,family = binomial, data = society)
+
 # running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 
 
 # model without any predictors
@@ -528,15 +534,22 @@ summary(emptymodel)
 
 # backwards selection
 backwards <- step(fullmodel)
+halfbackwards <- step(halffullmodel)
 summary(backwards)
+summary(halfbackwards)
 
 # forwards selection to compare backwards model with it. 
 forwards <- step(emptymodel,
 scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
 
+halfforwards <- step(emptymodel,scope=list(lower=formula(emptymodel),
+  upper=formula(halffullmodel)), direction="forward")
+
 # show different models: 
 formula(fullmodel)
 formula(backwards)
+formula(halffullmodel)
+formula(halfbackwards)
 
 
 ```
