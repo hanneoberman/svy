@@ -15,7 +15,7 @@ society$a_dvage <- as.numeric(society$a_dvage)
 
 # Abstract
 
-In this technical report, a single wave of the multi-year panel study ‘Understanding Society’ is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the ‘Understanding Society’ data: the ‘Innovation Panel’. The data was analyzed using the R package ‘survey’, and base R operations. [Add sentences about results and discussion!].
+In this technical report, a single wave of the multi-year panel study ???Understanding Society??? is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the ???Understanding Society??? data: the ???Innovation Panel???. The data was analyzed using the R package ???survey???, and base R operations. [Add sentences about results and discussion!].
 *Key terms*: survey package, design weights, adjustment weights, nonresponse.
 
 # Table of Contents
@@ -29,8 +29,8 @@ Appendix II: R Script
 
 # Introduction
 
-To estimate population quantities from sample data, broadly two strategies can be employed: model-based inference and design-based inference (Lohr, 2010). In this technical report, the effect of the latter on population estimates is investigated, by means of analyzing a single wave of Great Britain’s  multi-year panel study ‘Understanding Society’. This annual household panel survey is used to assess topics like housing, education, health, and employment among the general population of the United Kingdom. More specifically, we focus on the a subset of first wave, conducted between 2008 and 2009: the ‘Innovation Panel’ (IP). 
-	The purpose of the IP was to enable methodological research, before initiating the main ‘Understanding Society’ survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population. 
+To estimate population quantities from sample data, broadly two strategies can be employed: model-based inference and design-based inference (Lohr, 2010). In this technical report, the effect of the latter on population estimates is investigated, by means of analyzing a single wave of Great Britain???s  multi-year panel study ???Understanding Society???. This annual household panel survey is used to assess topics like housing, education, health, and employment among the general population of the United Kingdom. More specifically, we focus on the a subset of first wave, conducted between 2008 and 2009: the ???Innovation Panel??? (IP). 
+	The purpose of the IP was to enable methodological research, before initiating the main ???Understanding Society??? survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population. 
 To obtain the sample from the sampling frame, multistage stratified cluster sampling was used. Postal sectors acted as primary sampling units (PSUs) in the cluster design, and were sorted by Government Office Region. Within these regions, strata were constructed based on a.o. non-manual occupations, ethnic minority density, and population density. After stratification, a sample was drawn from the  sampling frame (the Postcode Address File), with probabilities proportional to the number of postal delivery points within each postcode sector (the stratified PSUs). Per postcode sector, 23 addresses were selected, yielding a total of 2760 addresses. However, interviews were only achieved in 1489 households (Boreham, & Constantine, 2008).
 [Add paragraph about Non-sampling, sampling, and nonresponse errors].
 
@@ -38,9 +38,9 @@ The aim of this research project is to investigate several properties of the IP 
 
 # Methods
 
-The data in this research project was obtained by ‘The National Centre for Social Research’ from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included the removal of irrelevant variables from the dataframe, …. (see Appendix II: R Script).
-To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package ‘survey’ (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', and ‘svymean’ are employed to estimate population quantities.
-Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package ‘MASS’ (Venables, & Ripley, 2002).
+The data in this research project was obtained by ???The National Centre for Social Research??? from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included the removal of irrelevant variables from the dataframe, ???. (see Appendix II: R Script).
+To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package ???survey??? (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', and ???svymean??? are employed to estimate population quantities.
+Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package ???MASS??? (Venables, & Ripley, 2002).
 
 # Results
 
@@ -65,11 +65,11 @@ Within the data, there is a proportion of sample members that did not personally
 Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
 
 Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
-Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Therefore, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together there are 485 cases of (partial) unit nonrespons within the subset of eligible individuals.
+Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Therefore, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together there are 485 cases of (partial) unit nonresponse within the subset of eligible individuals.
 
 Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
 
-Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
+Because (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
 
 
 ## Part II: Weighting
@@ -148,7 +148,6 @@ After post-stratfication (as we also included post-stratification in the previou
 
 
 # References
-
 Boreham, R., Constantine, R. (2008). Understanding Society Innovation Panel Wave 1: Technical Report. National Center for Social Research.
 Eurostat. (2018). Household composition statistics [Explainer]. Retrieved via https://ec.europa.eu/eurostat/statistics-explained/pdfscache/29071.pdf.
 Kumar, Rohit. (2014). Respondent Selection Methods in Household Surveys. Jharkhand Jounral of Development and Management Studies. XII. 5701-5708. 
@@ -171,8 +170,8 @@ sample. For more information, see
 https://www.understandingsociety.ac.uk/sites/default/files/downloads/documentation/innovat
 ion-panel/user-guides/ip_user_guide.pdf Within this file, further references are made to the
 sampling and weighting guidelines. Do read these, because this will be important for the rest of
-the analyses. The data file you need for this assignment is “understanding society innovation panel wave
-A.RDS”.
+the analyses. The data file you need for this assignment is ???understanding society innovation panel wave
+A.RDS???.
 
 Questions for report:
 (for questions 1-5), please ignore nonresponse errors.
@@ -180,22 +179,22 @@ Questions for report:
 case households are very large, a Kish Grid is used. Can you explain why the Kish Grid is a
 popular method to do within-household selection of respondents?
 2. Despite the complex data structure, the design weights as included in the variable
-“a_psnenip_xd” have a very low variance. Can you explain why this is the case?
-3. Apart from the design weight, an enumerated design weight “a_psnenip_xw” is also
+???a_psnenip_xd??? have a very low variance. Can you explain why this is the case?
+3. Apart from the design weight, an enumerated design weight ???a_psnenip_xw??? is also
 included. Please show using syntax in R how you can calculate this weight.
 4. What is the proportion of employed people of working age (15-64) in the population?
-(use variable “a_employ”)
+(use variable ???a_employ???)
 5. Please investigate the relationship between age and household composition for the
 population of Great Britain. Take the following steps:
 a. Investigate which age variable you should use (and whether choosing a particular age
 variable at all matters)
-b. Construct a new variable “household_composition” from the following four
-variables: “a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv”. You may also use
+b. Construct a new variable ???household_composition??? from the following four
+variables: ???a_livesp_dv, a_cohab_dv, a_single_dv, a_mastat_dv???. You may also use
 information from across household members to do this.
 c. Which weight should you use here?
 From here on, take nonresponse error into account.
 6. Not all sample members you included in questions 1-5 participated in the survey. Use
-the variable “a_ivfio” to investigate how many people personally conducted an
+the variable ???a_ivfio??? to investigate how many people personally conducted an
 interview.
 7. Repeat your analysis under question 4. Use only the people who personally did an
 interview. What is your conclusion? Is there a difference between respondents and
