@@ -413,6 +413,7 @@ formula(halfbackwards)
 
 # dive deeper into halfbackwards since this is our model of interest
 summary(halfbackwards)
+summary(halfforwards)
 # significant variables are a_agegr13, hh_size, hh_type, sex, urban and a_gor
 # significant with p < .001 are sex, a_agegr13_dv and hh_size. plot those (see below)
 
