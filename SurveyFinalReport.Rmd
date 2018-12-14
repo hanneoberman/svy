@@ -56,7 +56,7 @@ This method considered to lead to a random sample of household members, and avoi
 ![Kish Grid. *Note*. Reprinted from https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png](kish-grid.png)
  
 
-It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
+It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain (Kumar, 2014).  This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
 
 
 ### Proportion of personal interviews within the sample (RQ6)
@@ -114,8 +114,7 @@ To find the age groups, a new variable for grouped government office region was 
 
 ![Coefficients per Age.](coef2.png)
 
-These categories are theoretically logical: Children are gathered into one category (0-14), as are teens and young adults (15-24). Adults in the age range that is most likely to have young children are in one group (25-34), while older adults of working age are in another (35-)
-Considering age groups, the most logical categories are 0-20, 21-30, 31-40, 41-50, 51-70, 71-80, 81+. Theoretically speaking, the 51-70 category is a bit strange, but due to the rather convincing difference in weights between the 71-80 group and the neighbouring groups, two of the categories between 21 and 70 must be joined, and 51-70 is the most uniform weight-wise.
+These categories make sense both in theory and weight-wise (see Figure 3). Children are grouped together (0-14), as are teens and students (15-24). Adults are divided in three categories (25-34, 35-44, 45-64) and the elderly in two (65-74, 75+).
 
 A regression analysis revealed which groups were under- and overrepresented in the sample (compared to the population of Great Britain), with higher weights being assigned to underrepresented groups. While the weights are mostly decided by the design weights, the post-stratification does alter them.
 
@@ -123,17 +122,17 @@ Females have slightly lower weights than males, indicating that they were overre
 
 ### Construction of nonresponse weights (RQ8)
 
-Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
+Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response distribution is representative for the whole population. 
 
 If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. Different choices of auxiliary variables lead to different weights. In order to the weights to be useful, it is important to use powerful auxiliary variables (Brick, 2013).
 
-The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or S??rndal and Lundstr??m's (2010) paper.  	We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) S??rndal and Lundstr??m's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict nonresponse. 
+The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or Saarndal and Lundstrom's (2010) paper.  	We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) Saarndal and Lundstrom's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict nonresponse. 
 
 There are two stages of nonresponse we would have wanted to consider: 
 * person nonresponse: whether a personal interview was conducted yes or no;
 * household nonresponse: defined as completian of at least the household grid.
 
-However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occured in 13.5% of the observations in the sample.
+However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occurred in 26.2% of the observations in the sample.
 
 The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
 
