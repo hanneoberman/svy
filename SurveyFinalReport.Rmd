@@ -208,7 +208,7 @@ Lumley, T. (2018). Survey: analysis of complex survey samples [R package, versio
 
 R Core Team (2013). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. Retrieved via http://www.R-project.org/.
 
-Sa??rndal, C.E. and Lunsdstrom, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131'144.
+Saarndal, C.E. and Lundstrom, S. (2010). Design for Estimation: Identifying Auxiliary vectors to reduce nonresponse bias. Survey Methodology, 36, 131'144.
 
 Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Missing- at-Random Assumption. Journal of Official Statistics, 23, 51'68.
 
