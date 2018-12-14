@@ -116,6 +116,8 @@ To find the age groups, a new variable for grouped government office region was 
 
 These categories make sense both in theory and weight-wise (see Figure 3). Children are grouped together (0-14), as are teens and students (15-24). Adults are divided in three categories (25-34, 35-44, 45-64) and the elderly in two (65-74, 75+).
 
+As a final step, a third linear regression analysis was done to find out which groups had higher weights and were thus underrepresented in the sample.  
+
 A regression analysis revealed which groups were under- and overrepresented in the sample (compared to the population of Great Britain), with higher weights being assigned to underrepresented groups. While the weights are mostly decided by the design weights, the post-stratification does alter them.
 
 Females have slightly lower weights than males, indicating that they were overrepresented. For government office region groups, the people from England (excluding London and the Western Midlands) and Wales are the baseline and have the lowest of all weight, and thus were also overrepresented, with Scotland being the most underrepresented, followed by London and then the Western Midlands. With regards to age, the 0-20 group was surprisingly the most overrepresented, forming the baseline for this variable. The 21-30 and 31-40 groups were the most underrepresented and thus had the highest weights, followed by the 80+ group, the 51-70 group, the 41-50 group and finally the 71-80 group, which was by far the most underrepresented.

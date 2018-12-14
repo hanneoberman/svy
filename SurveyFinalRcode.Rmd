@@ -175,7 +175,7 @@ Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psne
 Nonmiss <- with(Design, subset(Design, a_employ!="refuse" & a_employ!="don\'t know"))
 svymean(~employ_dv, Nonmiss)
 confint(svymean(~employ_dv, Nonmiss))
-# 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%
+# 46,2% of the population is employed, with a 95% confidence interval of 44.3%-48.1%
 ```
 
 ## Question 5b
@@ -288,6 +288,8 @@ svychisq(~a_agegr11_dv + hh_type, design=Design, statistic = "Chisq")
 #svychisq(~ind+ridreth2, design = nhanes_design, data = nhanes, statistic = "Chisq")
 #svychisq(~BMIcu+ridreth2, nhanes_design, statistic = "Chisq")
 
+tab
+plot()
 
 # add percentages
 
@@ -324,6 +326,9 @@ I_personal <- with(Nonmiss, subset(Nonmiss, NR==0))
 # Calculate nonresponse
 svymean(~employ_dv, I_personal)
 confint(svymean(~employ_dv, I_personal))
+
+# With NR: 46,2% of the population is employed, with a 95% confidence interval of 44.3%-48.1%
+# Exclude NR: 50.4% of the population is employed, with a 95% confidence interval of 48.2%-52.6%
 ```
 
 ## Question 8
