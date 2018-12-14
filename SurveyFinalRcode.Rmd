@@ -262,7 +262,7 @@ ftable(tab)
 summary(ftable(tab))
 
 # plot the relationshp between age categories and household types. 
-png("Household composition with age", width = 1200, height = 500, res = 72)
+png("age_householdtype", width = 1200, height = 500, res = 72)
 plot(tab, xlab = "age", ylab = "household types", main = "Household types per age category",
      col=c("steelblue1","sienna1","plum2","goldenrod1")
      )
