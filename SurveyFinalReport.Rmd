@@ -157,6 +157,16 @@ However, as the levels of variable 'a_hhresp_dv' show, all households within the
 The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
 The predictive accuracy of the stepwise model is ..., where for the full model this was ..
 
+half full model: 
+NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + 
+    a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_size + n_child + 
+    hh_type
+half forward model: 
+NR ~ a_racel_dv + a_agegr5_dv + a_agegr13_dv + hh_size + a_sex + 
+    a_urban_dv
+half backwards model: (gor & hh_type are additional compared to forward)
+NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_agegr5_dv + 
+    a_agegr13_dv + hh_size + hh_type
 
 ## Part III: Estimation
 
@@ -192,6 +202,8 @@ The relationship between age and household composition is the following: ADD RES
 ### Proportion of employed people of working age, accounting for nonresponse (RQ7)
 
 After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
+
+
 
 
 # References

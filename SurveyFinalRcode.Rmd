@@ -249,7 +249,7 @@ Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psne
 
 ## Question 5d
 ```{r}
-tab <- svytable(~a_agegr5_dv + hh_type.x, Design) # creates a contingency table of 
+tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of 
 # The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
 
 # plot the relationshp between age categories and household types. 
@@ -344,13 +344,10 @@ halffullmodel <- glm(NR ~
 emptymodel <- nothing <- glm(NR ~ 
                              1,
                              family=binomial, data = society )
-summary(emptymodel)
 
 # backwards selection
 backwards <- step(fullmodel)
 halfbackwards <- step(halffullmodel)
-summary(backwards)
-summary(halfbackwards)
 
 # forwards selection to compare backwards model with it. 
 forwards <- step(emptymodel,
@@ -367,13 +364,37 @@ formula(halfforwards)
 formula(halffullmodel)
 formula(halfbackwards)
 
+# dive deeper into halfbackwards since this is our model of interest
+summary(halfbackwards)
+# significant variables are a_agegr13, hh_size, hh_type, sex, urban and a_gor
+# significant with p < .001 are sex, a_agegr13_dv and hh_size. plot those (see below)
 
-table(society$NR)
-#table(society$person_response, )
-table(as.matrix(society$NR), as.matrix(society$a_sex), dnn = c("response", "sex"))
+# evaluate fit 
+fit <- anova(halfbackwards, halffullmodel)
+library(lmtest)
+test <- lrtest(halfbackwards,halffullmodel)
 
+# interesting: a_agegr13_dv produces NA's for every category except 16-17 and 18-19 years old..? 
+# i tried to load all kinds of packages to compute a pseudo r squared but they didn't work.. 
 
+# plot nonresponse 
+tbl <- table(society$NR)
+t1 <- tbl/3600*100 
 
+# plot relationship sex / nonresponse 
+t2 <- table(as.matrix(society$a_sex),as.matrix(society$NR)) # females respond more often then males do 
+
+plot(t2) 
+
+# plot relationship age / nonresponse 
+t3 <- table(society$a_agegr13_dv, society$NR)
+
+plot(t3) # the higher the age category, the less nonresponse.
+
+# plot relationship hh_size / non response
+t4 <- table(society$hh_size, society$NR) # the bigger the household, the more nonresponders 
+
+plot(t4)
 #### SANNES CODE (I LEFT IT IN IF YOU WANT TO COMPARE IT, OTHERWISE IT CAN BE DELETED. X GERBRICH)
 #### Problematic variables:
 # a_racel_dv > maybe fuse different backgrounds?
