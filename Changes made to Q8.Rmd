@@ -1,0 +1,15 @@
+---
+title: "List of changes made to Q8"
+output: html_notebook
+---
+
+ Changes made:
+ - Removed ageest and ageif: Not informative, too many inapplicables
+ - Removed a_marstat > a_mastat_dv contains the same information, but with fewer levels
+ - Removed a_livewith > a_livewith_dv contains the same information, but with unmarried people being 'no' instead of 'inapplicable' > maybe switch?
+ - Removed a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
+ - Removed a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
+ - Fused similar levels in a_racel_dv
+ - Removed cases where a_employ was missing
+ - Fused respm16_dv and respf16_dv into resp16_dv
+ - Removed a_rach16_dv, contains little additional information compared to resp16_dv

@@ -22,7 +22,8 @@ society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 # society <- society[,-c(2,3,6,7,15:52, 61, 63, 64, 66:75, 78:80, 82:86, 90, 91, 93)]
 
 # Change variable types
-society$a_dvage <- as.numeric(society$a_dvage)
+# a_dvage is the average age over all waves. Inspecting the data shows that -6 gives the age during the first wave.
+society$a_dvage <- as.numeric(society$a_dvage) - 6
 ```
 
 # Sampling design
@@ -93,20 +94,26 @@ names(coeff2.age) <- x[x!=""]
 
 # Plot coefficients
 plot(as.numeric(names(coeff2.age)), coeff2.age)
-for (i in seq(10,110,10)+0.5){
+for (i in seq(4,104,10)+0.5){
  abline(v=i, col="red") 
 }
 
+# Plot with group changes
+plot(as.numeric(names(coeff2.age)), coeff2.age)
+for (i in c(14.5,24.5,34.5,44.5,64.5,74.5)){
+ abline(v=i, col="red") 
+}
 ```
 
 In accordance with the results, age is split up in sections of 10 years, with the 0-10 and 11-20 as well as the 51-60 and 61-79 categories combined and all people of age 81 and older placed into one group.
 
 ```{r}
 # Assign the levels
-levels(society$age_fac) <- c(rep("group0_20", 15), rep("group21_30", 10), 
-                               rep("group31_40", 10), rep("group41_50",10), 
-                               rep("group51_70", 20), rep("group71_80", 10), 
-                               rep("group_80", 22))
+levels(society$age_fac)
+levels(society$age_fac) <- c(rep("group0_14", 15), rep("group15_24", 10), 
+                               rep("group25_34", 10), rep("group35_44",10), 
+                               rep("group45_64", 20), rep("group65_74", 10), 
+                               rep("group_75", 22))
 
 # Create table
 with(society, table(age_fac,gor_groups))
@@ -249,7 +256,7 @@ Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psne
 
 ## Question 5d
 ```{r}
-tab <- svytable(~a_agegr5_dv + hh_type.x, Design) # creates a contingency table of 
+tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of 
 # The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
 
 # plot the relationshp between age categories and household types. 
@@ -300,60 +307,45 @@ mean(society$NR) # compute proportion nonresponders
 summary(society$a_hhresp_dv) 
 # All households at least filled in the grid, so we only look into person (unit) nonresponse.
 
-#### Changes made:
-# - Removed ageest and ageif: Not informative, too many inapplicables
-# - Removed a_marstat > a_mastat_dv contains the same information, but with fewer levels
-# - Removed a_livewith > a_livewith_dv contains the same information, but with unmarried people being 'no' instead of 'inapplicable' > maybe switch?
-# - Removed a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
-# - Removed a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
+##### Remove and change problematic variables
+# Combine races
+society$a_racel_dv <- factor(society$a_racel_dv)
+levels(society$a_racel_dv) <- c(rep("missing", 4), "UK Native", rep("White - Nonnative", 2), rep("Mixed", 4), rep("Asian or Asian British", 4), rep("Black/African/Carribean", 3), rep("Other",2))
 
+# Remove 2 cases where a_employ is missing
+society <- society[society$a_employ != "don't know" & a_employ != "refuse",]
+
+# Change livewith of same-sex couples to 'yes'
+society$a_livewith <- factor(society$a_livewith)
+levels(society$a_livewith) <- c("inapplicable", "yes", "no", "yes")
 
 #### Problematic variables:
-# a_racel_dv > maybe fuse different backgrounds?
-
-# a_employ > Only problematic for the two missing cases (remove those?)
-
 # a_dvage > Children under ten are all counted as missing, as they were not interviewed (remove those?)
 # Same problem with a_agegr5_dv, a_agegr10_dv. Also very similar, maybe take one?
 # a_mastat_dv: Don't know == nonresponse (7 cases), seperated but legally married == response (55 cases)
 
-# a_livewith: 2 cases of same-sex couples, maybe include in 'yes'?
-# To change levels: 
-# 1.Remove any variables with 0 observations to make things easier with:
-# society$a_livewith <- factor(society$a_livewith)
-# 2. Look at levels:
-# levels(society$a_livewith)
-# 3. Copy the levels, in the same order, and change the ones you want to change:
-# levels(society$a_livewith) <- c("inapplicable", "yes", "no", "yes")
-# Then the same-sex couples are under 'yes'
-
-society[society$a_nchild_dv==6,]
-
-# Possibly superfluous variables:
+#### Possibly superfluous variables:
 # a_dvage, a_agegr5_dv, a_agegr10_dv and a_agegr13_dv all include age
-# a_rach16_dv is only about the primary caretaker: if there are two parents and one child, only one of the two will be primary caretaker
 
 # Combine respm16_dv and respf16_dv
 society$a_resp16_dv <- "No"
 society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes"] <- "Yes" 
 
-class(society$a_nchild_dv)
-summary(society$a_nchild_dv)
-with(society, as.matrix(table(a_nchild_dv, NR)))
-plot(society$a_nchild_dv, society$NR)
-
-society[society$a_respf16_dv=="Yes" & society$a_rach16_dv=="No",]
-
 # model with all predictors
 fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-                   a_mastat_dv + a_livesp_dv +  a_livewith + a_cohab_dv +
-                   a_single_dv + a_depchl_dv + a_rach16_dv + a_resp16_dv + 
+                   a_employ + a_dvage + a_agegr13_dv + a_mastat_dv + a_livesp_dv +  
+                   a_livewith + a_cohab_dv + a_single_dv + a_depchl_dv + a_resp16_dv + 
                    a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
 
 fullmodel$coefficients
 
 # running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 
+
+
+halffullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
+                       a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_type + hh_size + n_child
+                       ,family = binomial, data = society)
+
 
 # model without any predictors
 emptymodel <- nothing <- glm(NR ~ 
@@ -372,4 +364,7 @@ scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forwa
 # show different models: 
 formula(fullmodel)
 formula(backwards)
+
+
+
 ```
