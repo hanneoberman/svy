@@ -36,7 +36,7 @@ The aim of this research project is to investigate several properties of the IP 
 
 # Methods
 
-The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data included recoding the variable 'a_dvage' as numeric instead of factor, and removal of irrelevant variables from the dataframe (see Appendix II: R Script).
+The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data consisted of removing variables irrelevant to the current study from the dataframe and subtracting 6 years from the variable 'a_dvage' so it correctly reflects the age of each person at the time of the first wave rather than the average age over all waves (see Appendix II: R Script). Additional preprocessing was done for RQ8 specifically. The details of this are described under this question's section.
 
 To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', ' and 'svymean' are employed to estimate population quantities. To investigate the relationship between age and household_type, the survey package function 'svytable' was used. 
 
@@ -61,16 +61,12 @@ It is a popular method because when carried out correctly, it leads to (almost) 
 
 ### Proportion of personal interviews within the sample (RQ6)
 
-Within the data, there is a proportion of sample members that did not personally take part in an interview, potentially leading to nonresponse bias. However, not all of these observations count as nonresponse. Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Accordingly, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together, 485 cases of (partial) unit nonrespons exist within the subset of eligible individuals.
+Within the data, there is a proportion of sample members that did not personally take part in an interview, potentially leading to nonresponse bias. However, not all of these observations count as nonresponse. Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Accordingly, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview and 257 interviews with children. Taken together, 485 cases of (partial) unit nonresponse exist within the subset of eligible individuals.
 
-Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
+Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons). 
+**>>>>>>>>>>No variable about belief included in our dataset!**
 
-Because (partial) nonrespons can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate unit nonresponse.
-Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Therefore, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview, and 257 interviews with children. Taken together there are 485 cases of (partial) unit nonresponse within the subset of eligible individuals.
-
-Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonrespons).
-
-Because (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse, and unit nonresponse. Because of time constraints within this research project, we only investigate how weights may be constructed to adjust for unit nonresponse (see Part III: Estimation).
+Because (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse and unit nonresponse. Because of time constraints within this research project, we only investigate how weights may be constructed to adjust for unit nonresponse (see Part III: Estimation).
 
 
 ## Part II: Weighting
@@ -96,38 +92,29 @@ A histogram of the design weight variable (see Figure 2) shows a different reaso
 
 ### Computation of enumerated weights (RQ3)
 
-Apart from design weights, each respondent is also assigned an enumerated weight (the variable 'a_psnenip_xw'). This post-stratified weight was calculated using the design weights, sex, age and government office region. It is known that age was split up in seven groups and the government office regions were split up in four, but which ones these were is unknown.
+Apart from design weights, each respondent is also assigned an enumerated weight (the variable 'a_psnenip_xw'). This weight was the design weights post-stratified for sex, age and government office region. In the innovation panel study, population values were retrieved from the UK government and the weights were adjusted based on the differences between the sample proportions and these population values. These population values could not be obtained for the current study due to the data not being available to the general public. Another hurdle that had to be overcome was that age and government office region were grouped into respectively seven and four groups (IP User Guide, p.57), but no information was given on how these groups were constructed. An attempt was made to reconstruct these groups using linear regression.
 
-In order to find out, we first turned age into a numeric variable and created dummy variables for all government office regions, with Scotland being the baseline. Sorting the coefficients from lowest to highest yielded the following graph:
+The first step taken was to construct a linear model that contained the design weights, sex, age (numeric, 'a_dvage') and the government office regions (gor):
 
-![Coefficients per Government Region.](coef.png)
+$$\adjusted \weight \~ \design \weight + \sex + \age + \gor$$
 
-It is not completely clear which values should be grouped together into four groups, but there are two groups of three regions and one group of two with near-identical weights. As can be seen on the map below, where the regions are numbered from the lowest to the highest weight, the grouping is rather strange.
+To find the grouping of government office regions, the coefficients that resulted from this regression, including the baseline, were ordered from lowest to highest, which resulted in the following graph:
+
+![Coefficients per Government Office Region.](coef.png)
+
+While there are clear groupings in the graph, they do not divide the data into four groups. To be able to investigate the data from a theoretical point of view, the numbers were drawn into a map of the regions, as shown below.
 
 ![Government Regions in Great Britain.](GOR.png) 
 
-The baseline and the other two areas with a weight close to zero are Scotland, London and the West Midlands. Scotland and London are prime candidates to be categories of their own, as Scotland has a strong regional identity and London is the capital of the country. From a data-driven perspective, combining the West Midlands with any region other than London or Scotland does not make sense, as the weight difference between those region and all other regions is relatively big. From a theory-driven perspective, we cannot think of any good reason to combine the West Midlands with London or Scotland: it is not filled with cities nor is it close enough to Scotland to assume a similar population.
+The three government office regions with high weights are Scotland, London and the West Midlands. Scotland and London are prime candidates to be categories of their own, as Scotland has a strong regional identity and London is the capital of the country. From a data-driven perspective, combining the West Midlands with any region other than London or Scotland does not make sense, as the weight difference between those region and all other regions is relatively big. From a theory-driven perspective, we cannot think of any good reason to combine the West Midlands with London or Scotland: it is not filled with cities nor is it close enough to Scotland to assume a similar population. 
 
-When assuming that the regions with a near-identical weight are in the same group and Scotland and London are two seperate categories, only a few possible groupings remain:
+When assuming that the regions with near identical weights are in the same group and Scotland and London each form one group on their own, the division between groups that makes most sense is that London, Scotland and the West Midlands are each categories of their own and Wales and the rest of England form the last group. Any other combination is unlikely due to inconsistencies with the found coefficients or with the theoretical background: any other combination would either require the grouping of the West Midlands with regions with a far lower weights, or would require London to be combined with Scotland or the West Midlands, which have very different demographics.
 
-1. South East, South West, and North East England are the third category, with Wales and the rest of England being the last category.
+To find the age groups, a new variable for grouped government office region was created, divided into the groups described above. A factor-version of the 'a_dvage' variable was also created in order to obtain the coefficients per age. A second linear regression was run similar to the previous one, but with the grouped GOR and factored age replacing the previously used age and GOR variables. The resulting graph, shown below, was used to split the age category into seven groups. In the graph, these groups are depicted with red lines.
 
-This makes some sense theoretically: the three are the very north and south of England, with the remainder being in the middle. Weight-wise however, combining the West Midlands with the areas with far lower weights does not make sense.
+![Coefficients per Age.](coef2.png)
 
-2. The same as above, but with the West Midlands grouped with London.
-
-This is more logical weight-wise than the first option, but from a theoretical perspective it is strange to combine the city with a rural area.
-
-3. The North West, West Midlands and East of England are the third category, with Wales and the rest of England being the last category.
-
-Weight-wise it is just as logical or illogical as the first option, but from a theoretical standpoint taking three areas in the middle seems to have less of a basis than taking the outer areas like is done in the first option.
-
-4. The West Midlands alone being the third category, with the rest of England being the fourth.
-
-This fits weight-wise, but why the West Midlands should be taken seperately is a mystery. It is however less absurd than combining it with London: the West Midlands may have unique features that we do not know about, but we do know that it is not a capital like London.
-
-In conclusion, the fourth option seems the most likely, as the grouping is logical from a data-driven perspective and while it does not quite make sense theoretically, there is no obvious reason to assume that it is incorrect. The best alternative is the first option, as it makes the most sense from a theoretical perspective.
-
+These categories are theoretically logical: Children are gathered into one category (0-14), as are teens and young adults (15-24). Adults in the age range that is most likely to have young children are in one group (25-34), while older adults of working age are in another (35-)
 Considering age groups, the most logical categories are 0-20, 21-30, 31-40, 41-50, 51-70, 71-80, 81+. Theoretically speaking, the 51-70 category is a bit strange, but due to the rather convincing difference in weights between the 71-80 group and the neighbouring groups, two of the categories between 21 and 70 must be joined, and 51-70 is the most uniform weight-wise.
 
 A regression analysis revealed which groups were under- and overrepresented in the sample (compared to the population of Great Britain), with higher weights being assigned to underrepresented groups. While the weights are mostly decided by the design weights, the post-stratification does alter them.
