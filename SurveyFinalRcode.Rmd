@@ -273,9 +273,10 @@ summary(ftable(tab))
 # plot the relationshp between age categories and household types. 
 png("age_householdtype", width = 1200, height = 500, res = 72)
 plot(tab, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
-     col=c("steelblue1","sienna1","plum2","goldenrod1")
-     #legend()
+     col=c("steelblue1","sienna1","plum2","goldenrod1"), las = 1, mar = c(3,4,4,2)
      )
+#legend(x = -1, legend = lvls, col = clrs, lty = 1, pch = 1)
+
 #legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = T )
 # BLUE = couple with children
 # PINK = single parent with children

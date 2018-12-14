@@ -189,8 +189,7 @@ Our objective was to investigate the relationsihp between age and household comp
 
 These are obviously just general observations, further statistical investigation is required if there are more specific research questions. 
 
-
->>> insert image age_householdtype.png 
+![Household type per age category](agehh.png)
 
 ### Proportion of employed people of working age (RQ4)
 
