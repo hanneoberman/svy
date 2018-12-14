@@ -249,14 +249,19 @@ table(households$hh_type)
 
 # Join to society dataset
 society <- left_join(society, households, by="a_hidp")
-
-# update sampling design 
-Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 ```
 
 ## Question 5d
 ```{r}
-tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of 
+# Create new age variable
+society$a_agegr11_dv <- factor(society$a_agegr13_dv)
+levels(society$a_agegr11_dv) <- c(rep("0-17 years old", 2), "18-19 years old",  "20-24 years old",  "25-29 years old",  "30-34 years old",  
+                                  "35-39 years old", "40-44 years old",  "45-49 years old",  "50-54 years old", "55-59 years old",  rep("60 years or older",2))
+
+# update sampling design 
+Design <- svydesign(ids=~pidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
+
+tab <- svytable(~a_agegr11_dv + hh_type, Design) # creates a contingency table of 
 # The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
 ftable(tab)
 summary(ftable(tab))
@@ -274,7 +279,10 @@ legend("left", c("Couple with children", "Single parent with children", "couple 
 dev.off() 
 
 # try to do Chisq test but this doesn't work:  
-#svychisq(~a_agegr5_dv + hh_type, Design)
+svychisq(~a_agegr11_dv + hh_type, design=Design, statistic = "Chisq")
+#svychisq(~ind+ridreth2, design = nhanes_design, data = nhanes, statistic = "Chisq")
+#svychisq(~BMIcu+ridreth2, nhanes_design, statistic = "Chisq")
+
 
 # add percentages
 
