@@ -332,6 +332,19 @@ confint(svymean(~employ_dv, I_personal))
 
 # With NR: 46,2% of the population is employed, with a 95% confidence interval of 44.3%-48.1%
 # Exclude NR: 50.4% of the population is employed, with a 95% confidence interval of 48.2%-52.6%
+
+# May be caused by children of younger than 10, which were not interviewed 
+# (and thus nonresponders) and are not employed 
+summary(society$employ_dv[society$a_dvage < 10])
+summary(factor(society$a_ivfio[society$a_dvage < 10]))
+
+# Create design that excludes children under the age of ten:
+Nochild <- with(Nonmiss, subset(Nonmiss, a_dvage >= 10))
+
+# Calculate nonresponse
+svymean(~employ_dv, Nochild)
+confint(svymean(~employ_dv, Nochild))
+# Estimated proportion 52.0%, 95% CI[50.0%, 54.1%]
 ```
 
 # Question 8
