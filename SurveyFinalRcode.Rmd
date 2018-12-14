@@ -384,7 +384,7 @@ fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv +
 fullmodel$coefficients
 # Doesn't produce errors
 
-# Hannes model doesn't:
+# Create new model without variables that constitute singularity errors:
 halffullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
                        a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_size + n_child + 
                        hh_type, family = binomial, data = society)
