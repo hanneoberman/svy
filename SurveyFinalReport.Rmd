@@ -4,29 +4,24 @@ author:
 - Gerbrich Ferdinands
 - Sanne Meijering
 - Hanne Oberman
-output: pdf_document
-
+date: "Dec 14, 2018"
+abstract: |
+  In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on   the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The      data was analyzed using the R package 'survey', and base R operations. \
+  *Key terms*: survey, design weights, adjustment weights, nonresponse.
+keywords:
+- survey
+- weigthing
+- nonresponse
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r include=FALSE}
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 society$a_dvage <- as.numeric(society$a_dvage)
 ```
-
-
-# Abstract
-
-In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the R package 'survey', and base R operations. **[Add sentences about results and discussion!]**.\
-*Key terms*: survey package, design weights, adjustment weights, nonresponse.
-
-# Table of Contents
-Introduction\
-Methods\
-Results\
-Discussion\
-References\
-Appendix I: Research Proposal\
-Appendix II: R Script
 
 
 # Introduction
