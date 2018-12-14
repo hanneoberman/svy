@@ -310,53 +310,37 @@ mean(society$NR) # compute proportion nonresponders
 summary(society$a_hhresp_dv) 
 # All households at least filled in the grid, so we only look into person (unit) nonresponse.
 
-# model with all predictors
-fullmodel <- glm(NR ~ 
-                   a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-                   a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
-                   a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
-                   a_nchild_dv + a_ndepchl_dv + 
-                   hh_type + hh_size + n_child # three self-constructed variables of household composition
-                   # don't forget to include self-made variables:
-                   #household_type + household_size + children
-                   , family = binomial, data = society)
-# this returns "glm.fit" fitted probabilities numerically 0 or 1 occurred. 
 ##### Remove and change problematic variables
 # Combine races
 society$a_racel_dv <- factor(society$a_racel_dv)
 levels(society$a_racel_dv) <- c(rep("missing", 4), "UK Native", rep("White - Nonnative", 2), rep("Mixed", 4), rep("Asian or Asian British", 4), rep("Black/African/Carribean", 3), rep("Other",2))
 
-#### The following variables are excluded  :
-# - ageest, a_dvage and ageif: Not informative, too many inapplicables. a_agegr5_dv, agegr10_dv & agegr13_dv are the remaining age variables in the model. 
-# - a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
-# - a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
-# - a_marstat > a_mastat_dv contains the same information, but with fewer levels
-# -  a_livewith > a_livewith_dv contains the same information, but with unmarried people being 'no' instead of 'inapplicable' > maybe switch?
-# - a_livesp + a_livesp_dv + a_cohab_dv + a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + a_nchild_dv # why they produce errors?
-# Remove 2 cases where a_employ is missing
-society <- society[society$a_employ != "don't know" & a_employ != "refuse",]
+# Change livewith of same-sex couples to 'yes'
+society$a_livewith <- factor(society$a_livewith)
+levels(society$a_livewith) <- c("inapplicable", "yes", "no", "yes")
 
-halffullmodel <- glm(NR ~ 
-                        a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                        a_employ + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-                        a_livesp + a_livesp_dv + a_cohab_dv +
-                        a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
-                        a_nchild_dv + 
-                        hh_type + hh_size + n_child # three self-constructed variables of household composition
-                        ,family = binomial, data = society)
-## still produces errors:
+# Combine respm16_dv and respf16_dv
+society$a_resp16_dv <- "No"
+society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes"] <- "Yes" 
+
+
+##### MODELS
+# model with all predictors
+fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                   a_employ + a_dvage + a_agegr13_dv + a_mastat_dv + a_livesp_dv +  
+                   a_livewith + a_cohab_dv + a_single_dv + a_depchl_dv + a_resp16_dv + 
+                   a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
+
+fullmodel$coefficients
+# Doesn't produce errors
+
 # Hannes model doesn't:
-halffullmodel <- glm(NR ~ 
-  a_gor_dv + a_urban_dv + a_sex + a_racel_dv +
-  a_employ + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-  hh_size + n_child + hh_type
-  ,family = binomial, data = society)
+halffullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
+                       a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_size + n_child + 
+                       hh_type, family = binomial, data = society)
 
 # model without any predictors
-emptymodel <- nothing <- glm(NR ~ 
-                             1,
-                             family=binomial, data = society )
+emptymodel <- nothing <- glm(NR ~ 1, family=binomial, data = society )
 
 # backwards selection
 backwards <- step(fullmodel)
@@ -367,7 +351,7 @@ forwards <- step(emptymodel,
 scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
 
 halfforwards <- step(emptymodel,scope=list(lower=formula(emptymodel),
-  upper=formula(halffullmodel)), direction="forward")
+                                           upper=formula(halffullmodel)), direction="forward")
 
 # show different models: 
 formula(fullmodel)
@@ -408,61 +392,4 @@ plot(t3) # the higher the age category, the less nonresponse.
 t4 <- table(society$hh_size, society$NR) # the bigger the household, the more nonresponders 
 
 plot(t4)
-#### SANNES CODE (I LEFT IT IN IF YOU WANT TO COMPARE IT, OTHERWISE IT CAN BE DELETED. X GERBRICH)
-#### Problematic variables:
-# a_racel_dv > maybe fuse different backgrounds?
-# a_employ > Only problematic for the two missing cases (remove those?)
-
-# Change livewith of same-sex couples to 'yes'
-society$a_livewith <- factor(society$a_livewith)
-levels(society$a_livewith) <- c("inapplicable", "yes", "no", "yes")
-
-#### Problematic variables:
-# a_dvage > Children under ten are all counted as missing, as they were not interviewed (remove those?)
-# Same problem with a_agegr5_dv, a_agegr10_dv. Also very similar, maybe take one?
-# a_mastat_dv: Don't know == nonresponse (7 cases), seperated but legally married == response (55 cases)
-
-#### Possibly superfluous variables:
-# a_dvage, a_agegr5_dv, a_agegr10_dv and a_agegr13_dv all include age
-
-# Combine respm16_dv and respf16_dv
-society$a_resp16_dv <- "No"
-society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes"] <- "Yes" 
-
-# model with all predictors
-fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_dvage + a_agegr13_dv + a_mastat_dv + a_livesp_dv +  
-                   a_livewith + a_cohab_dv + a_single_dv + a_depchl_dv + a_resp16_dv + 
-                   a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
-
-fullmodel$coefficients
-
-# running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 
-
-
-halffullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
-                       a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_type + hh_size + n_child
-                       ,family = binomial, data = society)
-
-
-# model without any predictors
-emptymodel <- nothing <- glm(NR ~ 
-                             1,
-                             family=binomial, data = society )
-summary(emptymodel)
-
-# backwards selection
-backwards <- step(fullmodel)
-summary(backwards)
-
-# forwards selection to compare backwards model with it. 
-forwards <- step(emptymodel,
-scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
-
-# show different models: 
-formula(fullmodel)
-formula(backwards)
-
-
-
 ```

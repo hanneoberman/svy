@@ -10,6 +10,15 @@ output: html_notebook
  - Removed a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
  - Removed a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
  - Fused similar levels in a_racel_dv
- - Removed cases where a_employ was missing
  - Fused respm16_dv and respf16_dv into resp16_dv
  - Removed a_rach16_dv, contains little additional information compared to resp16_dv
+ 
+ 
+# New version copy
+The following variables are excluded  :
+ - ageest, a_dvage and ageif: Not informative, too many inapplicables. a_agegr5_dv, agegr10_dv & agegr13_dv are the remaining age variables in the model. 
+ - a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
+ - a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
+ - a_marstat > a_mastat_dv contains the same information, but with fewer levels
+ -  a_livewith > a_livewith_dv contains the same information, but with unmarried people being 'no' instead of 'inapplicable' > maybe switch?
+ - a_livesp + a_livesp_dv + a_cohab_dv + a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + a_nchild_dv # why they produce errors?
