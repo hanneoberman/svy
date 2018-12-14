@@ -423,17 +423,8 @@ anova(halfbackwards, halffullmodel, test = "Chisq") # backwards model does an eq
 summary(halfbackwards)
 # significant variables are a_dvage, hh_size, hh_type, a_sex, a_urban_dv and a_gor_dv, n_child. 
 # significant with p < .001 B's come from variables a_sex, hh_size and hh_type (couple without children)
-```
-a_sex, hh_size and hh_type
 
-hh_size - for every unit increase in household size, the odds of nonresponse increase with exp(0.32727) = 1.39. So perosns in larer households have more have a larger probability for nonresponse. 
-a_sex - for females, the odds of nonresponse are exp(-0.67411) =  compared to men. So women are ... less likely to nonrespond than men. 
-The model has very high (and unlikely) coefficients for a_agegr5_dv, this is something we unfortunately do not have the time for to further investigate although we notice that this is important. 
-hh_size - for every unit increase in household size, the odds of nonresponse increase with exp(0.54251). 
-hh_type - the odds for nonresponse for couples without children decrease with exp(0.77833). Compared to the other householdtypes, odds of couples without children have the lowest chance at nonresponse.  
-
-
-```{r}
+# just some exploration of response distribution of individual variables 
 # plot nonresponse 
 tbl <- table(society$NR)
 t1 <- tbl/3600*100 
