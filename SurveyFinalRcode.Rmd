@@ -262,6 +262,12 @@ levels(society$a_agegr11_dv) <- c(rep("0-17", 2), "18-19",  "20-24",  "25-29",  
                                   "35-39", "40-44",  "45-49",
                                   "50-54", "55-59",  rep("60+",2))
 
+# Create another new age variable
+society$a_agegr5a_dv <- factor(society$a_agegr5_dv)
+
+levels(society$a_agegr5a_dv) <- c(rep("0-14", 3), "15-19", "20-24", "25-29", "30-34", "35-39",
+  "40-44", "45-49", "50-54", "55-59",  rep("60+",3))
+
 # update sampling design 
 Design <- svydesign(ids=~pidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 
@@ -273,9 +279,10 @@ summary(ftable(tab))
 # plot the relationshp between age categories and household types. 
 png("age_householdtype", width = 1200, height = 500, res = 72)
 plot(tab, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
-     col=c("steelblue1","sienna1","plum2","goldenrod1")
-     #legend()
+     col=c("steelblue1","sienna1","plum2","goldenrod1"), las = 1, mar = c(3,4,4,2)
      )
+#legend(x = -1, legend = lvls, col = clrs, lty = 1, pch = 1)
+
 #legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = T )
 # BLUE = couple with children
 # PINK = single parent with children
@@ -288,8 +295,12 @@ svychisq(~a_agegr11_dv + hh_type, design=Design, statistic = "Chisq")
 #svychisq(~ind+ridreth2, design = nhanes_design, data = nhanes, statistic = "Chisq")
 #svychisq(~BMIcu+ridreth2, nhanes_design, statistic = "Chisq")
 
-tab
-plot()
+# With 5 year interval variable
+tab5 <- svytable(~a_agegr5a_dv + hh_type, Design) # creates a contingency table of 
+plot(tab5, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
+     col=c("steelblue1","sienna1","plum2","goldenrod1"), las = 1, mar = c(3,4,4,2)
+     )
+
 
 # add percentages
 
