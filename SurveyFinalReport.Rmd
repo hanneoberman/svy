@@ -5,8 +5,8 @@ author:
 - Sanne Meijering
 - Hanne Oberman
 date: "Dec 14, 2018"
-abstract: |
-  In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on   the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The      data was analyzed using the R package 'survey', and base R operations. \
+abstract: | 
+ In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on   the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the statistical software *R*, and the 'survey' package. \
   *Key terms*: survey, design weights, adjustment weights, nonresponse.
 keywords:
 - survey
@@ -38,7 +38,7 @@ The aim of this research project is to investigate several properties of the IP 
 
 The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data consisted of removing variables irrelevant to the current study from the dataframe and subtracting 6 years from the variable 'a_dvage' so it correctly reflects the age of each person at the time of the first wave rather than the average age over all waves (see Appendix II: R Script). Additional preprocessing was done for RQ8 specifically. The details of this are described under this question's section.
 
-To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', ' and 'svymean' are employed to estimate population quantities. To investigate the relationship between age and household_type, the survey package function 'svytable' was used. 
+To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', 'svymean', and 'svychisq' are employed to estimate population quantities. To investigate the relationship between age and household_type, the survey package function 'svytable' was used. 
 
 Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package 'MASS' (Venables, & Ripley, 2002).
 
@@ -63,10 +63,9 @@ It is a popular method because when carried out correctly, it leads to (almost) 
 
 Within the data, there is a proportion of sample members that did not personally take part in an interview, potentially leading to nonresponse bias. However, not all of these observations count as nonresponse. Of the 3600 individuals in the sample, there are 459 children under the age of ten. These sample members are enumerated individuals, but ineligible for an interview. Accordingly, the number of eligible individuals in the sample is 3141. Of these 3141 eligible individuals, only 2656 respondents personally completed an interview. This number consists of 2399 adults who performed a full interview and 257 interviews with children. Taken together, 485 cases of (partial) unit nonresponse exist within the subset of eligible individuals.
 
-Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent. Information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonresponse). 
-**>>>>>>>>>>No variable about belief included in our dataset!**
+Moreover, there are 169 sample members for whom a proxy interview was conducted with a close relative or cohabitant (generally a spouse, partner or adult child; Understanding Society, 'Questions about variables', N.D.). Questions answered on the nonresponders' behalf were used to estimate factual information about the nonrespondent -- information about their beliefs is not collected by proxy, and are therefore indicated as missing (item nonresponse). In the current dataset, no variables about beliefs or opinions of respondents are included, leading to a lower nonresponse rate, but potentially higher nonresponse bias when proxy interview data is used to compensate partial nonresponse. 
 
-Because (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse and unit nonresponse. Because of time constraints within this research project, we only investigate how weights may be constructed to adjust for unit nonresponse (see Part III: Estimation).
+Since (partial) nonresponse can lead to nonresponse bias, it is important to investigate the effect of nonresponse on the estimates generated above. Ideally, we would both compare respondents to partial nonresponse and unit nonresponse. Because of time constraints within this research project, we only investigate how weights may be constructed to adjust for unit nonresponse (see Part III: Estimation).
 
 
 ## Part II: Weighting
@@ -137,7 +136,7 @@ There are two stages of nonresponse we would have wanted to consider:
 
 However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occurred in 26.2% of the observations in the sample.
 
-The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
+The forwards stepwise logistic regression model shows us that the variables 'a_racel_dv', 'a_agegr5_dv', 'a_agegr13_dv', 'hh_size', 'a_sex', and 'a_urban_dv' are useful in predicting nonresponse. That is, a linear combination of variables indicating race, sex, and age of respondents in combination with living situation (urban or rural area, and household size) yield a significant prediction of the logit of the nonresponse indicator. A backward stepwise analysis also indicated the variables household type (hh_type) and government office region (a_gor_dv) could explain some additional variance in nonresponse. Since this type of analysis is exploratory, no inferences will be drwan from these results.
 
 >>> Evaluate fit/prediction of model: The predictive accuracy of the stepwise model is ..., where for the full model this was ..
  
