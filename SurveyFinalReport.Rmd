@@ -38,7 +38,8 @@ The aim of this research project is to investigate several properties of the IP 
 
 The data in this research project was obtained by 'The National Centre for Social Research' from the United Kingdom (Boreham, & Constantine, 2008, p. 3), and retrieved via Dr. Peter Lugtig (Utrecht University). Data analysis is performed using the statistics freeware R (R Core Team, 2003). Preprocessing of the data consisted of removing variables irrelevant to the current study from the dataframe and subtracting 6 years from the variable 'a_dvage' so it correctly reflects the age of each person at the time of the first wave rather than the average age over all waves (see Appendix II: R Script). Additional preprocessing was done for RQ8 specifically. The details of this are described under this question's section.
 
-To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', and 'svymean' are employed to estimate population quantities.
+To obtain accurate estimates from survey data with a multistage sampling design, regular SRS estimators do not suffice (Lohr, 2010). Therefore, the R package 'survey' (Lumley, 2018) is used. By specifying the survey design and appropriate weights, estimates of population quantities and their variances are adjusted for the complex nature of the survey data. The survey package functions 'svydesign', ' and 'svymean' are employed to estimate population quantities. To investigate the relationship between age and household_type, the survey package function 'svytable' was used. 
+
 Moreover, stepwise logistic regression is performed to investigate which variables might be used to construct nonresponse weights. This exploratory analysis is conducted using the R package 'MASS' (Venables, & Ripley, 2002).
 
 
@@ -55,7 +56,7 @@ This method considered to lead to a random sample of household members, and avoi
 ![Kish Grid. *Note*. Reprinted from https://www.statisticshowto.datasciencecentral.com/wp-content/uploads/2017/09/kish-grid.png](kish-grid.png)
  
 
-It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain. This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
+It is a popular method because when carried out correctly, it leads to (almost) equal probability sampling, something other selection methods do not obtain (Kumar, 2014).  This is because of the way the grid is set up, each household member has an equal chance of being selected.  Moreover, the only information you need in order to select respondents is a list containing the names of the persons in the household you want to sample, because selection is based on the number you've assigned to them. Other selection methods usually need more information, like the date of birth of the household members.
 
 
 ### Proportion of personal interviews within the sample (RQ6)
@@ -121,20 +122,21 @@ Females have slightly lower weights than males, indicating that they were overre
 
 ### Construction of nonresponse weights (RQ8)
 
-Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response is representative for the whole population. 
+Nonresponse can seriously threat the quality of estimates if the nonresponders differ from the responders in the study. We can adjust for this by the use of auxiliary variables that hold information about the entire sample. We can compare the distribution of the auxiliary variables of the population with its response distribution, and assess whether the response distribution is representative for the whole population. 
 
 If the distributions differ, we must conclude that nonresponse has lead to a nonrepresentative sample. We can adjust for this by constructing nonresponse weights from the auxiliary variables. Then the weighted sample is representative with respect to the auxiliary variables used. Different choices of auxiliary variables lead to different weights. In order to the weights to be useful, it is important to use powerful auxiliary variables (Brick, 2013).
 
-The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or S??rndal and Lundstr??m's (2010) paper.  	We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) S??rndal and Lundstr??m's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict nonresponse. 
+The IP User Guide states that "all models used to predict response propensities as described in the Technical Details are fitted using stepwise backward logistic regression with p=0.05" (p. 56). Compared to other selection strategies, this is a fairly simple one. Considering these other strategies for selecting auxiliary variables for weighting adjustments for nonresponse, we advise to look into Schouten's (2007) proposed strategy of a forward inclusion-backward elimination algorithm and/or Saarndal and Lundstrom's (2010) paper.  	We opt for a stepwise backwards logistic regression of because this method is similiar to, yet easier to apply than the selection strategies described in Schouten (2007) Saarndal and Lundstrom's (2010). Most important, this selection strategy was also used in constructing the original weights in the dataset. With this method, we hope to identify variables that predict nonresponse. 
 
 There are two stages of nonresponse we would have wanted to consider: 
 * person nonresponse: whether a personal interview was conducted yes or no;
 * household nonresponse: defined as completian of at least the household grid.
 
-However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occured in 13.5% of the observations in the sample.
+However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occurred in 26.2% of the observations in the sample.
 
 The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
-The predictive accuracy of the stepwise model is ..., where for the full model this was ..
+
+>>> Evaluate fit/prediction of model: The predictive accuracy of the stepwise model is ..., where for the full model this was ..
  
 half full model: 
 NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + 
@@ -146,6 +148,9 @@ NR ~ a_racel_dv + a_agegr5_dv + a_agegr13_dv + hh_size + a_sex +
 half backwards model: (gor & hh_type are additional compared to forward)
 NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_agegr5_dv + 
     a_agegr13_dv + hh_size + hh_type
+    
+We investigate the most important predictors individually: 
+>>> plot relationships (I did a few analyses in the finalcode file but since the model isn't definitive I didn't write up any concluding remarks about them yet)
 
 ## Part III: Estimation
 
@@ -172,7 +177,19 @@ All three household composition indicators were constructed from the data and in
 
 Thirdly, we determided which weighting variable is appropriate to investigate the relationship between age and household composition. We want to use a weight per person (PSN), as it is impossible to calculate age per household. We also want to use the enumeration grid weights (EN), as both age and household composition have no missing values. We want the weights of the first wave (IP), as that is the one we are investigating. Finally, we want to use the stratified weights (XW) rather than the design weights, as we are investigating population values and not sample values. Thus, we want to use the weight a_psnenip_xw, as this is the only weight that covers the correct data in the correct way. 
 
-The relationship between age and household composition is the following: ADD RESULTS!!!
+Our objective was to investigate the relationsihp between age and household composition. We therefore plotted the composition of variable hh_type per age category (from a_agegr5_dv). The plot shows the relationships between household_type and age you'd expect, from which we will highlight a few: 
+
+* Persons in the youngest three age categories (0-4, 5-9 and 10-14 years old) where all members of either households of type "couple with children", or "single parent with children", obviously. 
+* The reverse pattern is found in the eldest age categories, where almost all persons are in a household of type "couple without children" or "single without children". 
+* There are also a few interesting developments of categories over age. 
+** As age increases, overall the occurence of households with children (pink and blue colored bars) declines. 
+** Looking at household type "couple with children", the transition from being child in such a household and becoming a parent shows from the decline and subsequent increase of occurences of this householdtype over age. 
+** Similarly, also the transition from living in  a household with no children to living in a household with children, to an "empty nest" is visible by the development of the orange bars (couple without children) and the blue bars (couple with children). This is also true for the yellow and pink bars (single without chldren and single parent with children)
+
+These are obviously just general observations, further statistical investigation is required if there are more specific research questions. 
+
+
+>>> insert image age_householdtype.png 
 
 ### Proportion of employed people of working age (RQ4)
 

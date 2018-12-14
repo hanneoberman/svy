@@ -252,24 +252,31 @@ table(households$hh_type)
 
 # Join to society dataset
 society <- left_join(society, households, by="a_hidp")
-
-# update sampling design 
-Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 ```
 
 ## Question 5d
 ```{r}
-tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of 
+# Create new age variable
+society$a_agegr11_dv <- factor(society$a_agegr13_dv)
+levels(society$a_agegr11_dv) <- c(rep("0-17", 2), "18-19",  "20-24",  "25-29",  "30-34",  
+                                  "35-39", "40-44",  "45-49",
+                                  "50-54", "55-59",  rep("60+",2))
+
+# update sampling design 
+Design <- svydesign(ids=~pidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
+
+tab <- svytable(~a_agegr11_dv + hh_type, Design) # creates a contingency table of 
 # The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
 ftable(tab)
 summary(ftable(tab))
 
 # plot the relationshp between age categories and household types. 
-png("Household composition with age", width = 1200, height = 500, res = 72)
-plot(tab, xlab = "age", ylab = "household types", main = "Household types per age category",
+png("age_householdtype", width = 1200, height = 500, res = 72)
+plot(tab, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
      col=c("steelblue1","sienna1","plum2","goldenrod1")
+     #legend()
      )
-legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = FALSE )
+#legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = T )
 # BLUE = couple with children
 # PINK = single parent with children
 # ORANGE = couple without children 
@@ -277,7 +284,10 @@ legend("left", c("Couple with children", "Single parent with children", "couple 
 dev.off() 
 
 # try to do Chisq test but this doesn't work:  
-#svychisq(~a_agegr5_dv + hh_type, Design)
+svychisq(~a_agegr11_dv + hh_type, design=Design, statistic = "Chisq")
+#svychisq(~ind+ridreth2, design = nhanes_design, data = nhanes, statistic = "Chisq")
+#svychisq(~BMIcu+ridreth2, nhanes_design, statistic = "Chisq")
+
 
 # add percentages
 
