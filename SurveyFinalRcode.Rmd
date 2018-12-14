@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Appendix II: R code"
 author:
 - Sanne Meijering
 - Hanne Oberman
@@ -26,9 +26,7 @@ society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 society$a_dvage <- as.numeric(society$a_dvage) - 6
 ```
 
-# Sampling design
-
-## Question 2
+# Question 2
 Investigation of design weights
 
 ```{r}
@@ -46,7 +44,7 @@ hist(society$a_psnenip_xd,
      xlab = "Value of the design weight")
 ```
 
-## Question 3
+# Question 3
 ```{r}
 # Investigate levels of government office region variable
 levels(society$a_gor_dv)
@@ -130,8 +128,7 @@ coeff3 <- coeff3$coefficients
 coeff3
 ```
 
-# Population Estimates
-## Question 4
+# Question 4
 ```{r}
 # Investigate the a_employ variable.
 levels(society$a_employ[society$a_dvage > 15 & society$a_dvage < 64])
@@ -164,7 +161,8 @@ with(society, nrow(society[a_employ=="yes" & a_dvage <15,]))
 # No one younger than 15 years is reported to be working, which is to be expected as it was not
 # a question asked to people under 21 years of age.
 
-# Since we wish to know the proportion of employed people of working age, we need 2 groups, one with employed adults and one with unemployed people and employed elderly.
+# Since we wish to know the proportion of employed people of working age, we need 2 groups:
+# one with employed adults and one with unemployed people and employed elderly.
 society$employ_dv <- as.numeric(0)
 society$employ_dv[society$a_employ=='yes' & society$a_dvage <= 65] <- 1
 
@@ -178,7 +176,7 @@ confint(svymean(~employ_dv, Nonmiss))
 # 46,2% of the population is employed, with a 95% confidence interval of 44.3%-48.1%
 ```
 
-## Question 5b
+# Question 5b
 ```{r}
 # Inspect levels of variables
 levels(society$a_livesp_dv)
@@ -254,9 +252,11 @@ table(households$hh_type)
 society <- left_join(society, households, by="a_hidp")
 ```
 
-## Question 5d
+# Question 5d
 ```{r}
-# Create two new age variables: one to plot with the five-year intervals, one with categories to compute the chi square statistic
+# Create two new age variables: 
+# one to plot with the five-year intervals, 
+# one with categories to compute the chi square statistic
 society$a_agegr5a_dv <- factor(society$a_agegr5_dv) #rename levels for readability
 levels(society$a_agegr5a_dv) <- c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39",
   "40-44", "45-49", "50-54", "55-59",  "60-64", "65-69", "70+") 
@@ -275,10 +275,13 @@ plot(tab5, xlab = "Age group (years old)", ylab = "Household type", main = "Hous
 # Perform chi square test to evaluate whether age and household type are independent
 svychisq(~a_agegr11_dv + hh_type, design=Design, statistic = "Chisq")
 
-########################################################################
+# Remove this part??? #######################################################################
 # >>>>>>> I think this is more interesting with the 5-year variable?
 tab <- svytable(~a_agegr11_dv + hh_type, Design) # creates a contingency table  
-# The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
+# The Ntotal argument can be either a single number or a data frame whose first 
+# column gives the (first-stage) sampling strata and second column the population size in each stratum. 
+# In this second case the svytable command performs ???post-stratification???: 
+# tabulating and scaling to the population within strata and then adding up the strata.
 ftable(tab)
 summary(ftable(tab))
 
@@ -295,7 +298,7 @@ dev.off() # >>>>>>> what is this??
 
 ######################################################################## 
 ```
-## Question 6
+# Question 6
 ```{r}
 # Summarise a_ivfio
 (summary <- summary(society$a_ivfio))
@@ -311,7 +314,7 @@ society$NR[society$a_ivfio == "Full interview"] <- 0
 ```
 
 
-## Question 7
+# Question 7
 ```{r}
 # Further investigate the level Language difficulties
 society$a_iproxy[society$a_ivfio=="Language difficulties"]
@@ -344,7 +347,7 @@ confint(svymean(~employ_dv, Nochild))
 # Estimated proportion 52.0%, 95% CI[50.0%, 54.1%]
 ```
 
-## Question 8
+# Question 8
 ```{r}
 # Investigate the nonresponse
 mean(society$NR) # compute proportion nonresponders
@@ -357,7 +360,9 @@ summary(society$a_hhresp_dv)
 ##### Remove and change problematic variables
 # Combine races
 society$a_racel_dv <- factor(society$a_racel_dv)
-levels(society$a_racel_dv) <- c(rep("missing", 4), "UK Native", rep("White - Nonnative", 2), rep("Mixed", 4), rep("Asian or Asian British", 4), rep("Black/African/Carribean", 3), rep("Other",2))
+levels(society$a_racel_dv) <- c(
+  rep("missing", 4), "UK Native", rep("White - Nonnative", 2), rep("Mixed", 4), 
+  rep("Asian or Asian British", 4), rep("Black/African/Carribean", 3), rep("Other",2))
 
 # Change livewith of same-sex couples to 'yes'
 society$a_livewith <- factor(society$a_livewith)
@@ -379,7 +384,7 @@ fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv +
 fullmodel$coefficients
 # Doesn't produce errors
 
-# Hannes model doesn't:
+# Create new model without variables that constitute singularity errors:
 halffullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + a_dvage + 
                        a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_size + n_child + 
                        hh_type, family = binomial, data = society)
