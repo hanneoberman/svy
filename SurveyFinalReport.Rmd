@@ -196,7 +196,8 @@ A third design was created to investigate this hypothesis, which excluded all ch
 
 # Discussion
 
-**In conclusion, ...**
+In this report, nonresponse in the Innovation Panel study was investigated. To this end, we first investigated the sampling procedure and the prevalence of nonresponse, then the weights, and finally the effect of nonresponse on population estimates. The main conclusions drawn in this article is that 
+
 
 \newpage
 
