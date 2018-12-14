@@ -21,8 +21,8 @@ society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 # Remove unnecessary columns
 society <- society[,c(1:5,8,11,12,14,53:60,62:65,76,77,81,87,89,92,94,95)]
 
-# Change variable types
-# a_dvage is the average age over all waves. Inspecting the data shows that -6 gives the age during the first wave.
+# a_dvage is the average age over all waves. 
+# Inspecting the data shows that -6 gives the age during the first wave.
 society$a_dvage <- as.numeric(society$a_dvage) - 6
 ```
 
@@ -144,22 +144,23 @@ nrow(society[society$a_employ=="proxy respondent",])
 
 summary(society$a_dvage[society$a_employ=="inapplicable"])
 # Inapplicable seems to contain all children and youths of 21 years and younger
-# It cannot be assumed that none of them is employed. It can however be assumed that only a
-# small part of them is employed, as children under 15 cannot be employed legally
+# It cannot be assumed that none of them is employed. It can however be assumed that only 
+# a small part of them is employed, as children under 15 cannot be employed legally
 # and most would still be going to a school or university.
 
 nrow(society[society$a_employ=="refuse",])
 nrow(society[society$a_employ=="don\'t know",])
 # Both refuse and don't know contain one row. These can be treated as missing data.
 
-# Thus, our goal is to compare the proportion of employed people (yes) of working age against 
-# the number of unemployed people (no, inapplicable), excluding the missing data (refuse, don't know)
+# Thus, our goal is to compare the proportion of employed people (yes) of working age 
+# against the number of unemployed people (no, inapplicable), excluding the missing 
+# data (refuse, don't know)
 
 with(society, nrow(society[a_employ=="yes" & a_dvage >64,]))
 # There are people older than 64 still working, we should exclude those. 
 with(society, nrow(society[a_employ=="yes" & a_dvage <15,]))
-# No one younger than 15 years is reported to be working, which is to be expected as it was not
-# a question asked to people under 21 years of age.
+# No one younger than 15 years is reported to be working, which is to be expected as it 
+# was not a question asked to people under 21 years of age.
 
 # Since we wish to know the proportion of employed people of working age, we need 2 groups:
 # one with employed adults and one with unemployed people and employed elderly.
@@ -258,18 +259,21 @@ society <- left_join(society, households, by="a_hidp")
 # one to plot with the five-year intervals, 
 # one with categories to compute the chi square statistic
 society$a_agegr5a_dv <- factor(society$a_agegr5_dv) #rename levels for readability
-levels(society$a_agegr5a_dv) <- c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39",
-  "40-44", "45-49", "50-54", "55-59",  "60-64", "65-69", "70+") 
-society$a_agegr11_dv <- factor(society$a_agegr13_dv) #combine levels so no NAs exist in the contingency table
-levels(society$a_agegr11_dv) <- c(rep("0-17", 2), "18-19",  "20-24",  "25-29",  "30-34",  
-  "35-39", "40-44",  "45-49", "50-54", "55-59",  rep("60+",2)) 
+levels(society$a_agegr5a_dv) <- c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29",
+                                  "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", 
+                                  "60-64", "65-69", "70+") 
+society$a_agegr11_dv <- factor(society$a_agegr13_dv) 
+# Combine levels so no NAs exist in the contingency table
+levels(society$a_agegr11_dv) <- c(rep("0-17", 2), "18-19",  "20-24",  "25-29",  "30-34",
+                            "35-39", "40-44",  "45-49", "50-54", "55-59",  rep("60+",2)) 
 
 # Update sampling design 
 Design <- svydesign(ids=~pidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
 
 # Create stacked barplot with 5 year interval variable
 tab5 <- svytable(~a_agegr5a_dv + hh_type, Design) # creates a contingency table  
-plot(tab5, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
+plot(tab5, xlab = "Age group (years old)", ylab = "Household type", 
+     main = "Household types per age category",
      col=c("steelblue1","sienna1","plum2","goldenrod1"), las = 1, mar = c(3,4,4,2))
 
 # Perform chi square test to evaluate whether age and household type are independent
@@ -279,21 +283,12 @@ svychisq(~a_agegr11_dv + hh_type, design=Design, statistic = "Chisq")
 # >>>>>>> I think this is more interesting with the 5-year variable?
 tab <- svytable(~a_agegr11_dv + hh_type, Design) # creates a contingency table  
 # The Ntotal argument can be either a single number or a data frame whose first 
-# column gives the (first-stage) sampling strata and second column the population size in each stratum. 
+# column gives the (first-stage) sampling strata and second column the population size 
+# in each stratum. 
 # In this second case the svytable command performs ???post-stratification???: 
 # tabulating and scaling to the population within strata and then adding up the strata.
 ftable(tab)
 summary(ftable(tab))
-
-# >>>>>>> this is old
-#png("age_householdtype", width = 1200, height = 500, res = 72)
-#plot(tab, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
-#     col=c("steelblue1","sienna1","plum2","goldenrod1"), las = 1, mar = c(3,4,4,2)
-#     )
-# BLUE = couple with children
-# PINK = single parent with children
-# ORANGE = couple without children 
-# YELLOW = single without children
 
 ######################################################################## 
 ```
@@ -306,7 +301,8 @@ adults <- sum(society$a_ivfio == "Full interview") #the full interviews with adu
 youths <- sum(society$a_ivfio ==  "Youth Interview") #the interviews with children
 sum(adults, youths) #all personally completed interviews
 
-# The nonresponse indicator is 1 for all (partial) nonresponse and 0 for full (youth) interviews
+# The nonresponse indicator is 1 for all (partial) nonresponse and 0 for full 
+# (youth) interviews
 society$NR <- 1
 society$NR[society$a_ivfio == "Youth Interview"] <- 0
 society$NR[society$a_ivfio == "Full interview"] <- 0
@@ -443,7 +439,8 @@ tbl <- table(society$NR)
 t1 <- tbl/3600*100 
 
 # plot relationship sex / nonresponse 
-t2 <- table(as.matrix(society$a_sex),as.matrix(society$NR)) # females respond more often then males do 
+t2 <- table(as.matrix(society$a_sex),as.matrix(society$NR)) 
+# females respond more often then males do 
 plot(t2) 
 
 # plot relationship age / nonresponse 
@@ -452,7 +449,8 @@ t3 <- table(society$a_agegr13_dv, society$NR)
 plot(t3) # the higher the age category, the less nonresponse.
 
 # plot relationship hh_size / non response
-t4 <- table(society$hh_size, society$NR) # the bigger the household, the more nonresponders 
+t4 <- table(society$hh_size, society$NR) 
+# the bigger the household, the more nonresponders 
 plot(t4) 
 
 # plot relationship hh_type / non response 
