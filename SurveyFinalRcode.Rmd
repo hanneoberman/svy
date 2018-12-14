@@ -263,13 +263,18 @@ tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of
 # The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
 ftable(tab)
 summary(ftable(tab))
+
 # plot the relationshp between age categories and household types. 
-plot(tab, xlab = "age categories", ylab = "household types", col=c("steelblue1","sienna1","plum2","goldenrod1"))
+png("Household composition with age", width = 1200, height = 500, res = 72)
+plot(tab, xlab = "age", ylab = "household types", main = "Household types per age category",
+     col=c("steelblue1","sienna1","plum2","goldenrod1")
+     )
+legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = FALSE )
 # BLUE = couple with children
 # PINK = single parent with children
 # ORANGE = couple without children 
 # YELLOW = single without children
-
+dev.off() 
 
 # try to do Chisq test but this doesn't work:  
 #svychisq(~a_agegr5_dv + hh_type, Design)
@@ -319,7 +324,7 @@ mean(society$NR) # compute proportion nonresponders
 summary(society$a_hhresp_dv) 
 # All households at least filled in the grid, so we only look into person (unit) nonresponse.
 # use design weights, 
-NRdesign <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~ )
+#NRdesign <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~ )
 
 ##### Remove and change problematic variables
 # Combine races
@@ -338,8 +343,9 @@ society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes
 ##### MODELS
 # model with all predictors
 fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_dvage + a_agegr13_dv + a_mastat_dv + a_livesp_dv +  
-                   a_livewith + a_cohab_dv + a_single_dv + a_depchl_dv + a_resp16_dv + 
+                   a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_livesp_dv +  a_livewith + a_cohab_dv + #a_mastat_dv +
+                   a_single_dv + a_depchl_dv + a_rach16_dv + a_resp16_dv + 
                    a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
 
 fullmodel$coefficients

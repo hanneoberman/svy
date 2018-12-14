@@ -4,8 +4,18 @@ author:
 - Gerbrich Ferdinands
 - Sanne Meijering
 - Hanne Oberman
-output: pdf_document
-
+date: "Dec 14, 2018"
+abstract: |
+  In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on   the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The      data was analyzed using the R package 'survey', and base R operations. \
+  *Key terms*: survey, design weights, adjustment weights, nonresponse.
+keywords:
+- survey
+- weigthing
+- nonresponse
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r include=FALSE}
@@ -14,32 +24,15 @@ society$a_dvage <- as.numeric(society$a_dvage)
 ```
 
 
-# Abstract
-
-In this technical report, a single wave of the multi-year panel study 'Understanding Society' is analyzed. More specifically, this research project focussed on the use of design and adjustment weights for estimating population quantities from a subset of the 'Understanding Society' data: the 'Innovation Panel'. The data was analyzed using the R package 'survey', and base R operations. **[Add sentences about results and discussion!]**.\
-*Key terms*: survey package, design weights, adjustment weights, nonresponse.
-
-# Table of Contents
-Introduction\
-Methods\
-Results\
-Discussion\
-References\
-Appendix I: Research Proposal\
-Appendix II: R Script
-
-
 # Introduction
 
 To estimate population quantities from sample data, broadly two strategies can be employed: model-based inference and design-based inference (Lohr, 2010). In this technical report, the effect of the latter on population estimates is investigated, by means of analyzing a single wave of Great Britain's  multi-year panel study 'Understanding Society'. This annual household panel survey is used to assess topics like housing, education, health, and employment among the general population of the United Kingdom. More specifically, we focus on the a subset of first wave, conducted between 2008 and 2009: the 'Innovation Panel' (IP). 
 
 The purpose of the IP was to enable methodological research, before initiating the main 'Understanding Society' survey. As a forerunner, the target sample size of the IP was 1500 households across Great Britain, whereas the intended sample size for the main survey was 40,000 households within the United Kingdom (Boreham, & Constantine, 2008). Therefore, the sampling frame of the IP, The Postcode Address File, encompassing England, Wales and Scotland. Other regions of the United Kingdom like Northern Ireland were not part of the target population.
 	
-To obtain the sample from the sampling frame, multistage stratified cluster sampling was used. Postal sectors acted as primary sampling units (PSUs) in the cluster design, and were sorted by Government Office Region. Within these regions, strata were constructed based on a.o. non-manual occupations, ethnic minority density, and population density. After stratification, a sample was drawn from the  sampling frame (the Postcode Address File), with probabilities proportional to the number of postal delivery points within each postcode sector (the stratified PSUs). Per postcode sector, 23 addresses were selected, yielding a total of 2760 addresses. However, interviews were only achieved in 1489 households (Boreham, & Constantine, 2008).\
+To obtain the sample from the sampling frame, multistage stratified cluster sampling was used. Postal sectors acted as primary sampling units (PSUs) in the cluster design, and were sorted by Government Office Region. Within these regions, strata were constructed based on a.o. non-manual occupations, ethnic minority density, and population density. After stratification, a sample was drawn from the  sampling frame (the Postcode Address File), with probabilities proportional to the number of postal delivery points within each postcode sector (the stratified PSUs). Per postcode sector, 23 addresses were selected, yielding a total of 2760 addresses. However, interviews were only achieved in 1489 households (Boreham, & Constantine, 2008). This discrepancy -- the sampling, non-sampling, and nonresponse errors -- is one of the main topics that is investigated in the current research project.
 
-**[Add paragraph about Non-sampling, sampling, and nonresponse errors].**
-
-The aim of this research project is to investigate several properties of the IP data, with respect to the sampling procedure, the use of weights in survey data analysis, and to estimate population quantities from the sample. The report is based on eight research questions (RQs) that were provided in the research proposal (Appendix I: Research Proposal). The RQs are structured according to three topics: sampling, weighting, and estimation. In the sampling part, we investigate how within-household selection of respondents was performed (RQ1), and how many people within the sample personally conducted an interview (RQ6). The part concerning survey weights encompasses a theoretical explanation for the variation between design weights across observations (RQ2), computation of enumerated weights (RQ3), and an effort to suggest variables that could be used to construct nonresponse weights (RQ8). Finally, in the third part population quantities are estimated: the relationship between age and household composition (RQ5), and the proportion of employed people of working age in the population with and without accounting for nonresponse (RQ4 and RQ7, respectively). The exact formulation of the research questions can be found in Appendix I: Research Proposal.
+The aim of this research project is to investigate several properties of the IP data, with respect to the sampling procedure, the use of weights in survey data analysis, and to estimate population quantities from the sample. The report is based on eight research questions (RQs) that were provided in the research proposal (Appendix I: Research Proposal). The RQs are structured according to three topics; Part I: Sampling, Part II: Weighting, and Part III: Estimation. In the sampling part, we investigate how within-household selection of respondents was performed (RQ1), and how many people within the sample personally conducted an interview (RQ6). The part concerning survey weights encompasses a theoretical explanation for the variation between design weights across observations (RQ2), computation of enumerated weights (RQ3), and an effort to suggest variables that could be used to construct nonresponse weights (RQ8). Finally, in the third part population quantities are estimated: the relationship between age and household composition (RQ5), and the proportion of employed people of working age in the population with and without accounting for nonresponse (RQ4 and RQ7, respectively). The exact formulation of the research questions can be found in Appendix I: Research Proposal.
 
 # Methods
 
@@ -85,7 +78,7 @@ Table 1. *Descriptive statistics of design weight variable 'a_psnenip_xd'*.
 
 Mean | SD | Min. | Max. 
 ------------- | ------------- | ------------- | ------------- 
-1.01 | 0.14 | 1 | 4 
+1.01 | 0.14 | 1.00 | 4.00 
 
 The low variance within the design weight variable can be due to rescaling of the weights, as explained in the IP User Guide (p. 56): "Each set of weights has been scaled by a constant factor to produce a mean of one amongst cases eligible to receive the weight". That is, the design weights are standardized on one. This procedure does, however, not affect the coefficient of variation.
 
@@ -143,7 +136,7 @@ However, as the levels of variable 'a_hhresp_dv' show, all households within the
 
 The backwards logistic regression model shows us that the variables ... are useful in predicting nonresponse. 
 The predictive accuracy of the stepwise model is ..., where for the full model this was ..
-
+ 
 half full model: 
 NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + 
     a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_size + n_child + 
@@ -166,7 +159,7 @@ The first categorical variable, a_agegr5_dv, contains 15 categories indicating a
 
 The continous variable a_dvage denotes the age of respondents in completed years at the moment the interview took place. This was computed by comparing the date of birth and the interview date, or using an estimate (see estimated age variable a_ageest (n = 22), and imputated age variable a_ageif (n = 55)).
 
-To investigate the relationship between age and household composition, it is necessary to know which households consist of children living at home, and which don't. Presumably, the largest variation between children living at home and those living independently occurs within the age group 15-25 year-olds. If we would use the ten-year intervals to indicate age, we might get less precise estimates, because of the large variance wihtin the age category '10-19 years old'. Therefore, we decided to use an age variable with smaller intervals. Because of the unequal intervals in the age variable with 13 categories, it should be analysed as ordinal variable. To interpret the relationship with household composition, this is not ideal. Ultimately, we decided to use either a_dvage or a_agegr5_dv.
+To investigate the relationship between age and household composition, it is necessary to know which households consist of children living at home, and which don't. Presumably, the largest variation between children living at home and those living independently occurs within the age group 15-25 year-olds. If we would use the ten-year intervals to indicate age, we might get less precise estimates, because of the large variance wihtin the age category '10-19 years old'. Therefore, we decided to use an age variable with smaller intervals. Because of the unequal intervals in the age variable with 13 categories, it should be analysed as ordinal variable. To interpret the relationship with household composition, this is not ideal. Ultimately, we decided to use agegr5_dv, which is categorical and allows us for contingency tables and nice graphical representations. 
 
 Secondly, to construct a new variable denoting household composition, we used Eurostat as reference. Eurostat distinghuishes three types of variables used to descripte household composition: 
 
@@ -186,11 +179,16 @@ The relationship between age and household composition is the following: ADD RES
 
 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%.
 
+
 ### Proportion of employed people of working age, accounting for nonresponse (RQ7)
 
 After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
+# Discussion
 
+**In conclusion, ...**
+
+\newpage
 
 
 # References
@@ -214,9 +212,13 @@ Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Mi
 Venables, W. N. & Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth Edition. Springer, New York. ISBN 0-387-95457-0
 
 
+\newpage
+
 # Appendix I: Research Proposal
 
-Understanding Society is a large, multi-year panel study of the population in the United Kingdom and Northern Ireland. The dataset that you will analyse is wave 1 of the Understanding Society Innovation Panel, which is used for testing instruments. The Innovation panel (IP) uses the same sampling procedure as the main Understanding Society Survey, apart from the fact that Northern Ireland is not included. Sampling is done using a multistage stratified cluster sample. For more information, see https://www.understandingsociety.ac.uk/sites/default/files/downloads/documentation/innovation-panel/user-guides/ip_user_guide.pdf Within this file, further references are made to the sampling and weighting guidelines. Do read these, because this will be important for the rest of the analyses. The data file you need for this assignment is 'understanding society innovation panel wave A.RDS'.
+Understanding Society is a large, multi-year panel study of the population in the United Kingdom and Northern Ireland. The dataset that you will analyse is wave 1 of the Understanding Society Innovation Panel, which is used for testing instruments. The Innovation panel (IP) uses the same sampling procedure as the main Understanding Society Survey, apart from the fact that Northern Ireland is not included. Sampling is done using a multistage stratified cluster sample. For more information, see https://www.understandingsociety.ac.uk/sites/default/files/downloads/documentation/innovation-panel/user-guides/ip_user_guide.pdf 
+
+Within this file, further references are made to the sampling and weighting guidelines. Do read these, because this will be important for the rest of the analyses. The data file you need for this assignment is 'understanding society innovation panel wave A.RDS'.
 
 Questions for report:
 (for questions 1-5), please ignore nonresponse errors.
