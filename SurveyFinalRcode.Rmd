@@ -335,8 +335,9 @@ society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes
 ##### MODELS
 # model with all predictors
 fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_dvage + a_agegr13_dv + a_mastat_dv + a_livesp_dv +  
-                   a_livewith + a_cohab_dv + a_single_dv + a_depchl_dv + a_resp16_dv + 
+                   a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_livesp_dv +  a_livewith + a_cohab_dv + #a_mastat_dv +
+                   a_single_dv + a_depchl_dv + a_rach16_dv + a_resp16_dv + 
                    a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
 
 fullmodel$coefficients
