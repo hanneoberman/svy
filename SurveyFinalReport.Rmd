@@ -192,11 +192,16 @@ The relationship between age and household composition is the following: ADD RES
 
 43,3% of the population is employed, with a 95% confidence interval of 41.4%-45.2%.
 
+
 ### Proportion of employed people of working age, accounting for nonresponse (RQ7)
 
 After post-stratfication (as we also included post-stratification in the previous analysis), 46% of the people who did a personal interview is employed, with a confidence interval of 44.9%-49.3%. For the previous question, where all but two people were included, the estimated proportion of the population that is employed was 43,3%, with a 95% confidence interval of 41.4%-45.2%. As neither mean is contained in the 95% confidence interval of the other, it can be concluded that there is a difference between respondents and non-respondents in employment, with respondents being more likely to be employed than non-respondents. 
 
+# Discussion
 
+**In conclusion, ...**
+
+\newpage
 
 
 # References
@@ -220,9 +225,13 @@ Schouten, B. (2007). A Selection Strategy for Weighting Variables Under a Not-Mi
 Venables, W. N. & Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth Edition. Springer, New York. ISBN 0-387-95457-0
 
 
+\newpage
+
 # Appendix I: Research Proposal
 
-Understanding Society is a large, multi-year panel study of the population in the United Kingdom and Northern Ireland. The dataset that you will analyse is wave 1 of the Understanding Society Innovation Panel, which is used for testing instruments. The Innovation panel (IP) uses the same sampling procedure as the main Understanding Society Survey, apart from the fact that Northern Ireland is not included. Sampling is done using a multistage stratified cluster sample. For more information, see https://www.understandingsociety.ac.uk/sites/default/files/downloads/documentation/innovation-panel/user-guides/ip_user_guide.pdf Within this file, further references are made to the sampling and weighting guidelines. Do read these, because this will be important for the rest of the analyses. The data file you need for this assignment is 'understanding society innovation panel wave A.RDS'.
+Understanding Society is a large, multi-year panel study of the population in the United Kingdom and Northern Ireland. The dataset that you will analyse is wave 1 of the Understanding Society Innovation Panel, which is used for testing instruments. The Innovation panel (IP) uses the same sampling procedure as the main Understanding Society Survey, apart from the fact that Northern Ireland is not included. Sampling is done using a multistage stratified cluster sample. For more information, see https://www.understandingsociety.ac.uk/sites/default/files/downloads/documentation/innovation-panel/user-guides/ip_user_guide.pdf 
+
+Within this file, further references are made to the sampling and weighting guidelines. Do read these, because this will be important for the rest of the analyses. The data file you need for this assignment is 'understanding society innovation panel wave A.RDS'.
 
 Questions for report:
 (for questions 1-5), please ignore nonresponse errors.
