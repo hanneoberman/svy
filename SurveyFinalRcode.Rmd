@@ -258,16 +258,22 @@ Design <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~a_psne
 ```{r}
 tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of 
 # The Ntotal argument can be either a single number or a data frame whose first column gives the (first-stage) sampling strata and second column the population size in each stratum. In this second case the svytable command performs ???post-stratification???: tabulating and scaling to the population within strata and then adding up the strata.
-
+ftable(tab)
+summary(ftable(tab))
 # plot the relationshp between age categories and household types. 
 plot(tab, xlab = "age categories", ylab = "household types", col=c("steelblue1","sienna1","plum2","goldenrod1"))
-
-# add percentages
-
 # BLUE = couple with children
 # PINK = single parent with children
 # ORANGE = couple without children 
-# YELLOW = single without children 
+# YELLOW = single without children
+
+
+# try to do Chisq test but this doesn't work:  
+#svychisq(~a_agegr5_dv + hh_type, Design)
+
+# add percentages
+
+ 
 ```
 ## Question 6
 ```{r}
@@ -309,6 +315,8 @@ mean(society$NR) # compute proportion nonresponders
 # Look at levels of household response
 summary(society$a_hhresp_dv) 
 # All households at least filled in the grid, so we only look into person (unit) nonresponse.
+# use design weights, 
+NRdesign <- svydesign(ids=~a_hidp, strata=~a_strata, data=society, weights=~ )
 
 ##### Remove and change problematic variables
 # Combine races
