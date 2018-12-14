@@ -113,8 +113,7 @@ To find the age groups, a new variable for grouped government office region was 
 
 ![Coefficients per Age.](coef2.png)
 
-These categories are theoretically logical: Children are gathered into one category (0-14), as are teens and young adults (15-24). Adults in the age range that is most likely to have young children are in one group (25-34), while older adults of working age are in another (35-)
-Considering age groups, the most logical categories are 0-20, 21-30, 31-40, 41-50, 51-70, 71-80, 81+. Theoretically speaking, the 51-70 category is a bit strange, but due to the rather convincing difference in weights between the 71-80 group and the neighbouring groups, two of the categories between 21 and 70 must be joined, and 51-70 is the most uniform weight-wise.
+These categories make sense both in theory and weight-wise (see Figure 3). Children are grouped together (0-14), as are teens and students (15-24). Adults are divided in three categories (25-34, 35-44, 45-64) and the elderly in two (65-74, 75+).
 
 A regression analysis revealed which groups were under- and overrepresented in the sample (compared to the population of Great Britain), with higher weights being assigned to underrepresented groups. While the weights are mostly decided by the design weights, the post-stratification does alter them.
 
