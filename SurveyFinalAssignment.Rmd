@@ -484,7 +484,7 @@ society$NR # non response indicator (see Q6)
 mean(society$NR) # compute proportion nonresponders
 levels(society$a_hhresp_dv) # looks like all households at least filled in the grid, so we only look into person (unit) nonresponse. 
 ```
-Individual nonresponse is 13.5%
+Individual nonresponse is ...%
 
 It looks like household nonresponse cannot be identified in this dataset. The levels of variable A_hhresp_dv suggests that all households at least completed the household grid. Even though according to the user guide, the household response should be about 59%. For now, we only take into account individual nonresponse. If available it could also be interesting to use household nonresponse as a potentially useful auxiliary variable. 
 
@@ -521,7 +521,7 @@ fullmodel <- glm(NR ~
 halffullmodel <- glm(NR ~ 
   a_gor_dv + a_urban_dv + a_sex + a_racel_dv +
   a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-  household_size + singleadults + inacouple + single
+  hh_size + n_child + hh_type
   ,family = binomial, data = society)
 
 # running this gives: fitted probabilities numerically 0 or 1 occured --> delete variables that create perfect separation..  (38 not defined because of singularities). Excluding those variables didn't lead to differnt outcomes, therefore we decided to leave them in. 

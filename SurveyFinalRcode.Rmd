@@ -261,10 +261,13 @@ tab <- svytable(~a_agegr5_dv + hh_type, Design) # creates a contingency table of
 
 # plot the relationshp between age categories and household types. 
 plot(tab, xlab = "age categories", ylab = "household types", col=c("steelblue1","sienna1","plum2","goldenrod1"))
+
+# add percentages
+
 # BLUE = couple with children
 # PINK = single parent with children
-# Orange = couple without children 
-# yellow = single without children 
+# ORANGE = couple without children 
+# YELLOW = single without children 
 ```
 ## Question 6
 ```{r}
@@ -307,13 +310,108 @@ mean(society$NR) # compute proportion nonresponders
 summary(society$a_hhresp_dv) 
 # All households at least filled in the grid, so we only look into person (unit) nonresponse.
 
+# model with all predictors
+fullmodel <- glm(NR ~ 
+                   a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                   a_employ + a_ageest + a_ageif + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                   a_marstat + a_livesp +  a_livewith + a_adresp15 + a_adresp17 + a_livesp_dv + a_cohab_dv +
+                   a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
+                   a_nchild_dv + a_ndepchl_dv + 
+                   hh_type + hh_size + n_child # three self-constructed variables of household composition
+                   # don't forget to include self-made variables:
+                   #household_type + household_size + children
+                   , family = binomial, data = society)
+# this returns "glm.fit" fitted probabilities numerically 0 or 1 occurred. 
 ##### Remove and change problematic variables
 # Combine races
 society$a_racel_dv <- factor(society$a_racel_dv)
 levels(society$a_racel_dv) <- c(rep("missing", 4), "UK Native", rep("White - Nonnative", 2), rep("Mixed", 4), rep("Asian or Asian British", 4), rep("Black/African/Carribean", 3), rep("Other",2))
 
+#### The following variables are excluded  :
+# - ageest, a_dvage and ageif: Not informative, too many inapplicables. a_agegr5_dv, agegr10_dv & agegr13_dv are the remaining age variables in the model. 
+# - a_adresp15 and a_adresp17 > these are PNOs and thus useless for prediction
+# - a_ndepchl_dv > Same as a_nchild_dv, but with the Department for Work and Protection's definition of 'dependent'
+# - a_marstat > a_mastat_dv contains the same information, but with fewer levels
+# -  a_livewith > a_livewith_dv contains the same information, but with unmarried people being 'no' instead of 'inapplicable' > maybe switch?
+# - a_livesp + a_livesp_dv + a_cohab_dv + a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + a_nchild_dv # why they produce errors?
 # Remove 2 cases where a_employ is missing
 society <- society[society$a_employ != "don't know" & a_employ != "refuse",]
+
+halffullmodel <- glm(NR ~ 
+                        a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+                        a_employ + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+                        a_livesp + a_livesp_dv + a_cohab_dv +
+                        a_single_dv + a_mastat_dv + a_depchl_dv + a_rach16_dv + a_respm16_dv + a_respf16_dv + 
+                        a_nchild_dv + 
+                        hh_type + hh_size + n_child # three self-constructed variables of household composition
+                        ,family = binomial, data = society)
+## still produces errors:
+# Hannes model doesn't:
+halffullmodel <- glm(NR ~ 
+  a_gor_dv + a_urban_dv + a_sex + a_racel_dv +
+  a_employ + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+  hh_size + n_child + hh_type
+  ,family = binomial, data = society)
+
+# model without any predictors
+emptymodel <- nothing <- glm(NR ~ 
+                             1,
+                             family=binomial, data = society )
+
+# backwards selection
+backwards <- step(fullmodel)
+halfbackwards <- step(halffullmodel)
+
+# forwards selection to compare backwards model with it. 
+forwards <- step(emptymodel,
+scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
+
+halfforwards <- step(emptymodel,scope=list(lower=formula(emptymodel),
+  upper=formula(halffullmodel)), direction="forward")
+
+# show different models: 
+formula(fullmodel)
+formula(backwards)
+formula(forwards)
+formula(halfforwards)
+formula(halffullmodel)
+formula(halfbackwards)
+
+# dive deeper into halfbackwards since this is our model of interest
+summary(halfbackwards)
+# significant variables are a_agegr13, hh_size, hh_type, sex, urban and a_gor
+# significant with p < .001 are sex, a_agegr13_dv and hh_size. plot those (see below)
+
+# evaluate fit 
+fit <- anova(halfbackwards, halffullmodel)
+library(lmtest)
+test <- lrtest(halfbackwards,halffullmodel)
+
+# interesting: a_agegr13_dv produces NA's for every category except 16-17 and 18-19 years old..? 
+# i tried to load all kinds of packages to compute a pseudo r squared but they didn't work.. 
+
+# plot nonresponse 
+tbl <- table(society$NR)
+t1 <- tbl/3600*100 
+
+# plot relationship sex / nonresponse 
+t2 <- table(as.matrix(society$a_sex),as.matrix(society$NR)) # females respond more often then males do 
+
+plot(t2) 
+
+# plot relationship age / nonresponse 
+t3 <- table(society$a_agegr13_dv, society$NR)
+
+plot(t3) # the higher the age category, the less nonresponse.
+
+# plot relationship hh_size / non response
+t4 <- table(society$hh_size, society$NR) # the bigger the household, the more nonresponders 
+
+plot(t4)
+#### SANNES CODE (I LEFT IT IN IF YOU WANT TO COMPARE IT, OTHERWISE IT CAN BE DELETED. X GERBRICH)
+#### Problematic variables:
+# a_racel_dv > maybe fuse different backgrounds?
+# a_employ > Only problematic for the two missing cases (remove those?)
 
 # Change livewith of same-sex couples to 'yes'
 society$a_livewith <- factor(society$a_livewith)
