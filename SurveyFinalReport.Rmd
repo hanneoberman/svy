@@ -136,20 +136,9 @@ There are two stages of nonresponse we would have wanted to consider:
 
 However, as the levels of variable 'a_hhresp_dv' show, all households within the sample completed at least the household grid. We do not have any information about the 1271 adresses that were selected from the sampling frame but did not take part in an interview. Therefore, we only account for individual unit nonresponse, which occurred in 26.2% of the observations in the sample.
 
-The forwards stepwise logistic regression model shows us that the variables 'a_racel_dv', 'a_agegr5_dv', 'a_agegr13_dv', 'hh_size', 'a_sex', and 'a_urban_dv' are useful in predicting nonresponse. That is, a linear combination of variables indicating race, sex, and age of respondents in combination with living situation (urban or rural area, and household size) yield a significant prediction of the logit of the nonresponse indicator. A backward stepwise analysis also indicated the variables household type (hh_type) and government office region (a_gor_dv) could explain some additional variance in nonresponse. Since this type of analysis is exploratory, no inferences will be drwan from these results.
+The forwards stepwise logistic regression model shows us that the variables 'a_racel_dv', 'a_agegr5_dv', 'a_agegr13_dv', 'hh_size', 'a_sex', and 'a_urban_dv' are useful in predicting nonresponse. That is, a linear combination of variables indicating race, sex, and age of respondents in combination with living situation (urban or rural area, and household size) yield a significant prediction of the logit of the nonresponse indicator. A backward stepwise analysis also indicated the variables household type (hh_type) and government office region (a_gor_dv) could explain some additional variance in nonresponse. The variables 'a_employ', 'a_agegr10_dv', and 'n_child' were not included in the model. 
 
->>> Evaluate fit/prediction of model: The predictive accuracy of the stepwise model is ..., where for the full model this was ..
- 
-half full model: 
-NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_employ + 
-    a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + hh_size + n_child + 
-    hh_type
-half forward model: 
-NR ~ a_racel_dv + a_agegr5_dv + a_agegr13_dv + hh_size + a_sex + 
-    a_urban_dv
-half backwards model: (gor & hh_type are additional compared to forward)
-NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + a_agegr5_dv + 
-    a_agegr13_dv + hh_size + hh_type
+Importantly, since this type of analysis is exploratory, no inferences will be drawn from these results. **The predictive accuracy of the stepwise model is ..., where for the full model this was ..**
     
 We investigate the most important predictors individually: 
 >>> plot relationships (I did a few analyses in the finalcode file but since the model isn't definitive I didn't write up any concluding remarks about them yet)
@@ -181,6 +170,8 @@ Thirdly, we determided which weighting variable is appropriate to investigate th
 
 Our objective was to investigate the relationsihp between age and household composition. We therefore plotted the composition of variable hh_type per age category (from a_agegr5_dv). The plot shows the relationships between household_type and age you'd expect, from which we will highlight a few: 
 
+![Household type per age category.](age5hh.png)
+
 * Persons in the youngest three age categories (0-4, 5-9 and 10-14 years old) where all members of either households of type "couple with children", or "single parent with children", obviously. 
 * The reverse pattern is found in the eldest age categories, where almost all persons are in a household of type "couple without children" or "single without children". 
 * There are also a few interesting developments of categories over age. 
@@ -188,9 +179,8 @@ Our objective was to investigate the relationsihp between age and household comp
 ** Looking at household type "couple with children", the transition from being child in such a household and becoming a parent shows from the decline and subsequent increase of occurences of this householdtype over age. 
 ** Similarly, also the transition from living in  a household with no children to living in a household with children, to an "empty nest" is visible by the development of the orange bars (couple without children) and the blue bars (couple with children). This is also true for the yellow and pink bars (single without chldren and single parent with children)
 
-These are obviously just general observations, further statistical investigation is required if there are more specific research questions. 
+These are obviously just general observations, further statistical investigation is required if there are more specific research questions. Therefore we created a new age variable in which all household types were represented within an age group (see Appendix II: R Code). With this new variable, we performed a Chi square test of independence to evaluate the statistical relationship between age and household type. It appeares that age and household type are not independent within the current sample; $\chi^2$(30) = 1763.1, *p* < .001. This result strongly suggests that age and household type are related in the population.
 
-![Household type per age category](agehh.png)
 
 ### Proportion of employed people of working age (RQ4)
 
