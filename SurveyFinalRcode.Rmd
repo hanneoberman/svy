@@ -19,7 +19,7 @@ require(MASS)
 society <- readRDS("Understanding Society innovation pnel wave A.RDS")
 
 # Remove unnecessary columns
-# society <- society[,-c(2,3,6,7,15:52, 61, 63, 64, 66:75, 78:80, 82:86, 90, 91, 93)]
+society <- society[,c(1:5,8,11,12,14,53:60,62:65,76,77,81,87,89,92,94,95)]
 
 # Change variable types
 # a_dvage is the average age over all waves. Inspecting the data shows that -6 gives the age during the first wave.
