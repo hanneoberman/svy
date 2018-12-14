@@ -258,8 +258,9 @@ society <- left_join(society, households, by="a_hidp")
 ```{r}
 # Create new age variable
 society$a_agegr11_dv <- factor(society$a_agegr13_dv)
-levels(society$a_agegr11_dv) <- c(rep("0-17 years old", 2), "18-19 years old",  "20-24 years old",  "25-29 years old",  "30-34 years old",  
-                                  "35-39 years old", "40-44 years old",  "45-49 years old",  "50-54 years old", "55-59 years old",  rep("60 years or older",2))
+levels(society$a_agegr11_dv) <- c(rep("0-17", 2), "18-19",  "20-24",  "25-29",  "30-34",  
+                                  "35-39", "40-44",  "45-49",
+                                  "50-54", "55-59",  rep("60+",2))
 
 # update sampling design 
 Design <- svydesign(ids=~pidp, strata=~a_strata, data=society, weights=~a_psnenip_xw)
@@ -271,10 +272,11 @@ summary(ftable(tab))
 
 # plot the relationshp between age categories and household types. 
 png("age_householdtype", width = 1200, height = 500, res = 72)
-plot(tab, xlab = "age", ylab = "household types", main = "Household types per age category",
+plot(tab, xlab = "Age group (years old)", ylab = "Household type", main = "Household types per age category",
      col=c("steelblue1","sienna1","plum2","goldenrod1")
+     #legend()
      )
-legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = FALSE )
+#legend("left", c("Couple with children", "Single parent with children", "couple without children", "single without children"), col =c("steelblue1","plum2","sienna1","goldenrod1"), horiz = T )
 # BLUE = couple with children
 # PINK = single parent with children
 # ORANGE = couple without children 
