@@ -371,13 +371,13 @@ society$a_resp16_dv[society$a_respf16_dv == "Yes" | society$a_respf16_dv == "Yes
 
 ##### MODELS
 # model with all predictors
-fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
-                   a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
-                   a_livesp_dv +  a_livewith + a_cohab_dv + #a_mastat_dv +
-                   a_single_dv + a_depchl_dv + a_rach16_dv + a_resp16_dv + 
-                   a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
-
-fullmodel$coefficients
+# fullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_racel_dv + 
+#                    a_employ + a_dvage + a_agegr5_dv + a_agegr10_dv + a_agegr13_dv + 
+#                    a_livesp_dv +  a_livewith + a_cohab_dv + #a_mastat_dv +
+#                    a_single_dv + a_depchl_dv + a_rach16_dv + a_resp16_dv + 
+#                    a_nchild_dv + hh_type + hh_size + n_child, family = binomial, data = society)
+# 
+# fullmodel$coefficients
 # Doesn't produce errors
 
 # Create new model without variables that constitute singularity errors:
@@ -390,20 +390,20 @@ halffullmodel <- glm(NR ~ a_gor_dv + a_urban_dv + a_sex + a_dvage +
 emptymodel <- nothing <- glm(NR ~ 1, family=binomial, data = society )
 
 # backwards selection
-backwards <- step(fullmodel)
+# backwards <- step(fullmodel)
 halfbackwards <- step(halffullmodel)
 
 # forwards selection to compare backwards model with it. 
-forwards <- step(emptymodel,
-scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
+# forwards <- step(emptymodel,
+# scope=list(lower=formula(emptymodel),upper=formula(fullmodel)), direction="forward")
 
 halfforwards <- step(emptymodel,scope=list(lower=formula(emptymodel),
                                            upper=formula(halffullmodel)), direction="forward")
 
 # show different models: 
-formula(fullmodel)
-formula(backwards)
-formula(forwards)
+# formula(fullmodel)
+# formula(backwards)
+# formula(forwards)
 formula(halfforwards)
 formula(halffullmodel)
 formula(halfbackwards)
@@ -431,20 +431,36 @@ t1 <- tbl/3600*100
 
 # plot relationship sex / nonresponse 
 t2 <- table(as.matrix(society$a_sex),as.matrix(society$NR)) 
+t2 <- prop.table(t2, margin = 1)
 # females respond more often then males do 
-plot(t2) 
-
-# plot relationship age / nonresponse 
-t3 <- table(society$a_agegr13_dv, society$NR)
-
-plot(t3) # the higher the age category, the less nonresponse.
+plot(t2, xlab = "sex", ylab = "nonresponse = 1", 
+     main = "distribution of nonresponse",
+     col=c("steelblue1","sienna1"), las = 1)
 
 # plot relationship hh_size / non response
 t4 <- table(society$hh_size, society$NR) 
+t4 <- prop.table(t4, margin =1)
+
 # the bigger the household, the more nonresponders 
-plot(t4) 
+plot(t4, xlab = "household size", ylab = "nonresponse = 1", 
+     main = "distribution of nonresponse",
+     col=c("steelblue1","sienna1"), las = 1)
 
 # plot relationship hh_type / non response 
-t5 <- table(society$NR, society$hh_type)
+t5 <- table(society$hh_type, society$NR)
+t5 <- prop.table(t5, margin = 1)
+plot(t5, xlab = "household type", ylab = "nonresponse = 1", 
+     main = "distribution of nonresponse",
+     col=c("steelblue1","sienna1"), las = 1)
+
+
+# plot relationship age / nonresponse 
+t3 <- table(society$a_agegr13_dv, society$NR)
+t3 <- prop.table(t3, margin =1)
+plot(t3, xlab = "age", ylab = "nonresponse = 1", 
+     main = "distribution of nonresponse",
+     col=c("steelblue1","sienna1"), las = 1) # the higher the age category, the less nonresponse.
+
+
 ```
 
