@@ -427,31 +427,43 @@ summary(halfbackwards)
 # just some exploration of response distribution of individual variables 
 # plot nonresponse 
 tbl <- table(society$NR)
-t1 <- tbl/3600*100 
+#t1 <- tbl/3600*100 
+tbl <- prop.table(tbl, margin = 1)
 
+png("nonresponse.png")
+plot(tbl, ylab = "nonresponse = 1", 
+     main = "distribution of nonresponse",
+     col=c("steelblue1","sienna1"), las = 1)
+dev.off()
 # plot relationship sex / nonresponse 
+
 t2 <- table(as.matrix(society$a_sex),as.matrix(society$NR)) 
 t2 <- prop.table(t2, margin = 1)
 # females respond more often then males do 
+png("sex.png")
 plot(t2, xlab = "sex", ylab = "nonresponse = 1", 
      main = "distribution of nonresponse",
      col=c("steelblue1","sienna1"), las = 1)
-
+dev.off()
 # plot relationship hh_size / non response
 t4 <- table(society$hh_size, society$NR) 
 t4 <- prop.table(t4, margin =1)
 
 # the bigger the household, the more nonresponders 
+png("hh_size.png")
 plot(t4, xlab = "household size", ylab = "nonresponse = 1", 
      main = "distribution of nonresponse",
      col=c("steelblue1","sienna1"), las = 1)
+dev.off()
 
 # plot relationship hh_type / non response 
 t5 <- table(society$hh_type, society$NR)
 t5 <- prop.table(t5, margin = 1)
+png("hh_type.png")
 plot(t5, xlab = "household type", ylab = "nonresponse = 1", 
      main = "distribution of nonresponse",
      col=c("steelblue1","sienna1"), las = 1)
+dev.off()
 
 
 # plot relationship age / nonresponse 
