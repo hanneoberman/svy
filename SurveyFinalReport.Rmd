@@ -175,9 +175,9 @@ Our objective was to investigate the relationsihp between age and household comp
 
 ![Household type per age category.](age5hh.png)
 
-* Persons in the youngest three age categories (0-4, 5-9 and 10-14 years old) where all members of either households of type "couple with children", or "single parent with children", obviously. 
-* The reverse pattern is found in the eldest age categories, where almost all persons are in a household of type "couple without children" or "single without children". 
-* There are also a few interesting developments of categories over age. 
+1. Persons in the youngest three age categories (0-4, 5-9 and 10-14 years old) where all members of either households of type "couple with children", or "single parent with children", obviously. 
+2. The reverse pattern is found in the eldest age categories, where almost all persons are in a household of type "couple without children" or "single without children". 
+3. There are also a few interesting developments of categories over age. 
 + As age increases, overall the occurence of households with children (pink and blue colored bars) declines. 
 + Looking at household type "couple with children", the transition from being child in such a household and becoming a parent shows from the decline and subsequent increase of occurences of this householdtype over age. 
 + Similarly, also the transition from living in  a household with no children to living in a household with children, to an "empty nest" is visible by the development of the orange bars (couple without children) and the blue bars (couple with children). This is also true for the yellow and pink bars (single without chldren and single parent with children)
